@@ -23,7 +23,7 @@ FROM ubuntu:24.04
 
 # Install runtime dependencies (not dev packages)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libssl1.1 ca-certificates && \
+    libssl3 ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
