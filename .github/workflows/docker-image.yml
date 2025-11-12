@@ -17,13 +17,19 @@ jobs:
 
       - name: Verify SSH secrets
         run: |
-          for secret in LIGHTSAIL_HOST LIGHTSAIL_USER SSH_PRIVATE_KEY DISCORD_TOKEN; do
-            if [ -z "${{ secrets[$secret] }}" ]; then
-              echo "ERROR: $secret secret is missing!"
-              exit 1
-            fi
-          done
-          echo "All secrets are set in the deployment"
+          if [ -z "${{ secrets.LIGHTSAIL_HOST }}" ]; then
+            echo "ERROR: LIGHTSAIL_HOST secret is missing!"
+            exit 1
+          fi
+          if [ -z "${{ secrets.LIGHTSAIL_USER }}" ]; then
+            echo "ERROR: LIGHTSAIL_USER secret is missing!"
+            exit 1
+          fi
+          if [ -z "${{ secrets.SSH_PRIVATE_KEY }}" ]; then
+            echo "ERROR: SSH_PRIVATE_KEY secret is missing!"
+            exit 1
+          fi
+          echo "All SSH secrets are set."
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
