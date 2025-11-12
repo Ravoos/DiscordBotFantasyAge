@@ -48,7 +48,8 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/discordbotfantasyage:latest
+          owner="${GITHUB_REPOSITORY_OWNER,,}"
+          IMAGE_NAME=ghcr.io/${owner}/discordbotfantasyage:latest
           echo "Building and pushing image: $IMAGE_NAME"
           docker buildx build \
             --file .devcontainer/Dockerfile \
@@ -67,7 +68,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/discordbotfantasyage:latest
+            owner="${GITHUB_REPOSITORY_OWNER,,}"
+            IMAGE_NAME=ghcr.io/${owner}/discordbotfantasyage:latest
             echo "Pulling Docker image $IMAGE_NAME"
             docker pull $IMAGE_NAME
 
