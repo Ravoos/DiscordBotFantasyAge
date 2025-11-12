@@ -1,0 +1,29 @@
+{
+  "name": "FantasyAge Discord Bot",
+  "build": {
+    "dockerfile": "../Dockerfile",
+    "context": ".."
+  },
+  "workspaceFolder": "/app",
+  "remoteUser": "vscode",
+  "mounts": [
+    "source=${localWorkspaceFolder}/.env,target=/app/.env,type=bind"
+  ],
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      },
+      "extensions": [
+        "rust-lang.rust-analyzer",
+        "vadimcn.vscode-lldb"
+      ]
+    }
+  },
+  "postCreateCommand": "cargo install cargo-watch",
+  "runArgs": [
+    "--env-file",
+    ".env"
+  ],
+  "updateContentCommand": ""
+}
