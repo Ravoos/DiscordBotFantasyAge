@@ -80,12 +80,12 @@ jobs:
             docker pull $IMAGE_NAME
 
             echo "Stopping old container (if exists)"
-            docker stop discord-bot || true
-            docker rm discord-bot || true
+            docker stop fantasy_age_discord_bot || true
+            docker rm fantasy_age_discord_bot || true
 
             echo "Running new container"
             docker run -d \
-              --name discord-bot \
+              --name fantasy_age_discord_bot \
               --restart unless-stopped \
               -e DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }} \
               $IMAGE_NAME
