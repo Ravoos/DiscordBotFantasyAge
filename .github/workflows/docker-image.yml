@@ -17,32 +17,23 @@ jobs:
 
       - name: Verify SSH secrets
         run: |
-          if [ -z "${{ secrets.LIGHTSAIL_HOST }}" ]; then
-            echo "ERROR: LIGHTSAIL_HOST secret is missing!"
-            exit 1
-          fi
-          if [ -z "${{ secrets.LIGHTSAIL_USER }}" ]; then
-            echo "ERROR: LIGHTSAIL_USER secret is missing!"
-            exit 1
-          fi
-          if [ -z "${{ secrets.SSH_PRIVATE_KEY }}" ]; then
-            echo "ERROR: SSH_PRIVATE_KEY secret is missing!"
-            exit 1
-          fi
-          echo "All SSH secrets are set ✅"
+          for secret in LIGHTSAIL_HOST LIGHTSAIL_USER SSH_PRIVATE_KEY DISCORD_TOKEN; do
+            if [ -z "${{ secrets[$secret] }}" ]; then
+              echo "ERROR: $secret secret is missing!"
+              exit 1
+            fi
+          done
+          echo "All secrets are set in the deployment"
 
-      - name: Log in to GitHub Container Registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-        
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Cache Docker layers
         uses: actions/cache@v4
@@ -54,8 +45,7 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          owner="${GITHUB_REPOSITORY_OWNER,,}"
-          IMAGE_NAME=ghcr.io/${owner}/discordbotfantasyage:latest
+          IMAGE_NAME=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/discordbotfantasyage:latest
           echo "Building and pushing image: $IMAGE_NAME"
           docker buildx build \
             --file .devcontainer/Dockerfile \
@@ -69,24 +59,26 @@ jobs:
       - name: Deploy to AWS Lightsail
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.LIGHTSAIL_HOST }}
-          username: ${{ secrets.LIGHTSAIL_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
-          script: |
-            owner="${GITHUB_REPOSITORY_OWNER,,}"
-            owner="${owner:-ravoos}"
-            IMAGE_NAME=ghcr.io/${owner}/discordbotfantasyage:latest
-            echo "Pulling Docker image $IMAGE_NAME"
-            docker pull $IMAGE_NAME
+            host: ${{ secrets.LIGHTSAIL_HOST }}
+            username: ${{ secrets.LIGHTSAIL_USER }}
+            key: ${{ secrets.SSH_PRIVATE_KEY }}
+            port: 22
+            script: |
+              IMAGE_NAME=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/discordbotfantasyage:latest
 
-            echo "Stopping old container (if exists)"
-            docker stop fantasy_age_discord_bot || true
-            docker rm fantasy_age_discord_bot || true
+              echo "Pulling Docker image $IMAGE_NAME..."
+              docker pull $IMAGE_NAME || true
 
-            echo "Running new container"
-            docker run -d \
-              --name fantasy_age_discord_bot \
-              --restart unless-stopped \
-              -e DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }} \
-              $IMAGE_NAME
+              echo "Stopping old container if exists..."
+              docker stop fantasy_age_discord_bot || true
+              docker rm fantasy_age_discord_bot || true
+
+              echo "Running new container..."
+              docker run -d \
+                --name fantasy_age_discord_bot \
+                --restart unless-stopped \
+                -e DISCORD_TOKEN="${DISCORD_TOKEN}" \
+                $IMAGE_NAME
+              env:
+                DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+
