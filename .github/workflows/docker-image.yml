@@ -75,6 +75,7 @@ jobs:
           port: 22
           script: |
             owner="${GITHUB_REPOSITORY_OWNER,,}"
+            owner="${owner:-ravoos}"
             IMAGE_NAME=ghcr.io/${owner}/discordbotfantasyage:latest
             echo "Pulling Docker image $IMAGE_NAME"
             docker pull $IMAGE_NAME
