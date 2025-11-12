@@ -15,7 +15,7 @@ RUN mkdir src && echo "fn main() {}" > src/main.rs
 RUN cargo build --release; rm -rf src
 
 # Copy actual source and build release binary
-COPY FantasyAgeDiceBot/ .
+COPY fantasy_age_discord_bot/ .
 RUN cargo build --release
 
 # ====== Runtime stage ======
