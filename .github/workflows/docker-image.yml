@@ -74,7 +74,7 @@ jobs:
           port: 22
           envs: DISCORD_TOKEN
           script: |
-            OWNER="${{ github.repository_owner }}"
+            OWNER="Ravoos"
             IMAGE_NAME="ghcr.io/${OWNER,,}/discordbotfantasyage:latest"
 
             echo "Pulling Docker image $IMAGE_NAME..."
@@ -88,7 +88,5 @@ jobs:
             docker run -d \
               --name fantasy_age_discord_bot \
               --restart unless-stopped \
-              -e DISCORD_TOKEN="$DISCORD_TOKEN" \
+              -e DISCORD_TOKEN='${{ secrets.DISCORD_TOKEN }}' \
               $IMAGE_NAME
-        env:
-          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
