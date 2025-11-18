@@ -51,8 +51,11 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          IMAGE_NAME=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/discordbotfantasyage:latest
+          OWNER="${{ github.repository_owner }}"
+          IMAGE_NAME="ghcr.io/${OWNER,,}/discordbotfantasyage:latest"
+
           echo "Building and pushing image: $IMAGE_NAME"
+
           docker buildx build \
             --file .devcontainer/Dockerfile \
             --cache-from type=local,src=/tmp/.buildx-cache \
@@ -65,26 +68,27 @@ jobs:
       - name: Deploy to AWS Lightsail
         uses: appleboy/ssh-action@v1.0.3
         with:
-            host: ${{ secrets.LIGHTSAIL_HOST }}
-            username: ${{ secrets.LIGHTSAIL_USER }}
-            key: ${{ secrets.SSH_PRIVATE_KEY }}
-            port: 22
-            script: |
-              IMAGE_NAME=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/discordbotfantasyage:latest
+          host: ${{ secrets.LIGHTSAIL_HOST }}
+          username: ${{ secrets.LIGHTSAIL_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          envs: DISCORD_TOKEN
+          script: |
+            OWNER="${{ github.repository_owner }}"
+            IMAGE_NAME="ghcr.io/${OWNER,,}/discordbotfantasyage:latest"
 
-              echo "Pulling Docker image $IMAGE_NAME..."
-              docker pull $IMAGE_NAME || true
+            echo "Pulling Docker image $IMAGE_NAME..."
+            docker pull $IMAGE_NAME || true
 
-              echo "Stopping old container if exists..."
-              docker stop fantasy_age_discord_bot || true
-              docker rm fantasy_age_discord_bot || true
+            echo "Stopping old container if exists..."
+            docker stop fantasy_age_discord_bot || true
+            docker rm fantasy_age_discord_bot || true
 
-              echo "Running new container..."
-              docker run -d \
-                --name fantasy_age_discord_bot \
-                --restart unless-stopped \
-                -e DISCORD_TOKEN="${DISCORD_TOKEN}" \
-                $IMAGE_NAME
-              env:
-                DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
-
+            echo "Running new container..."
+            docker run -d \
+              --name fantasy_age_discord_bot \
+              --restart unless-stopped \
+              -e DISCORD_TOKEN="$DISCORD_TOKEN" \
+              $IMAGE_NAME
+        env:
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
