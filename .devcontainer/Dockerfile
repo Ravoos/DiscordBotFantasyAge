@@ -19,11 +19,11 @@ COPY fantasy_age_discord_bot/ .
 RUN cargo build --release
 
 # ====== Runtime stage ======
-FROM ubuntu:24.04
+FROM debian:bullseye-slim
 
 # Install runtime dependencies (not dev packages)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libssl3 ca-certificates && \
+    ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
