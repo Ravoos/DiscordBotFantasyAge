@@ -1,17 +1,19 @@
 use serenity::{
-    all::{CreateInteractionResponseMessage, Interaction}, 
-    async_trait, 
-    builder::{CreateCommand, CreateCommandOption, CreateInteractionResponse}, 
+    all::{CreateInteractionResponseMessage, Interaction},
+    async_trait,
+    builder::{CreateCommand, CreateCommandOption, CreateInteractionResponse},
     model::{
         application::{CommandDataOptionValue, CommandOptionType},
         gateway::Ready,
-    }, prelude::*,
+    },
+    prelude::*,
 };
 use anyhow::Result;
 use rand::Rng;
 use regex::Regex;
 use dotenv::dotenv;
 use std::{collections::HashMap, env};
+use tokio::time::{sleep, Duration};
 
 struct Handler;
 
@@ -41,10 +43,10 @@ impl EventHandler for Handler {
                 .create_response(
                     &ctx.http,
                     CreateInteractionResponse::Message(
-                        CreateInteractionResponseMessage::new()
-                            .content(&response)
-                    )
-                ).await
+                        CreateInteractionResponseMessage::new().content(&response),
+                    ),
+                )
+                .await
             {
                 tracing::error!("Error sending slash command response: {:?}", why);
             }
@@ -90,12 +92,7 @@ fn main_dice_roller(modifier: i32) -> String {
         format!(" - {}", modifier.abs())
     };
 
-    let mut output = format!(
-        "Result: {:?}{} = {}",
-        rolls,
-        modifier_str,
-        final_amount
-    );
+    let mut output = format!("Result: {:?}{} = {}", rolls, modifier_str, final_amount);
 
     if has_duplicates {
         output.push_str(&format!("\n**DOUBLES!** You gain {} stunt points!", last_roll));
@@ -130,10 +127,7 @@ fn damage_dice_roller(input: &str) -> String {
 
         format!(
             "You rolled {}d6{} {:?} = **{}**",
-            num_dice,
-            modifier_str,
-            rolls,
-            total
+            num_dice, modifier_str, rolls, total
         )
     } else {
         "Invalid format. Please use Xd6+Y or Xd6-Y, e.g., 2d6+3".to_string()
@@ -156,21 +150,28 @@ async fn main() -> Result<()> {
         Ok(t) => t,
         Err(_) => {
             tracing::error!("DISCORD_TOKEN is not set!");
-            return Ok(());
+            loop {
+                sleep(Duration::from_secs(10)).await;
+            }
         }
     };
+    tracing::info!("DISCORD_TOKEN length: {}", token.len());
 
     let intents = GatewayIntents::GUILDS;
 
+    // Client creation with logging and loop on failure
     let mut client = match Client::builder(&token, intents)
         .event_handler(Handler)
-        .await {
-            Ok(c) => c,
-            Err(err) => {
-                tracing::error!("Failed to create Discord client: {:?}", err);
-                return Ok(());
+        .await
+    {
+        Ok(c) => c,
+        Err(err) => {
+            tracing::error!("Failed to create Discord client: {:?}", err);
+            loop {
+                sleep(Duration::from_secs(10)).await;
             }
-        };
+        }
+    };
 
     // Register global commands safely
     match serenity::model::application::Command::set_global_commands(
@@ -188,7 +189,9 @@ async fn main() -> Result<()> {
                     .required(true),
                 ),
         ],
-    ).await {
+    )
+    .await
+    {
         Ok(_) => tracing::info!("Registered global commands successfully."),
         Err(err) => tracing::error!("Failed to register global commands: {:?}", err),
     }
@@ -196,6 +199,9 @@ async fn main() -> Result<()> {
     tracing::info!("Starting Discord client event loop...");
     if let Err(why) = client.start().await {
         tracing::error!("Client error: {:?}", why);
+        loop {
+            sleep(Duration::from_secs(10)).await;
+        }
     }
 
     Ok(())
