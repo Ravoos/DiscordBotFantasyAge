@@ -1,38 +1,32 @@
-# ====== Build stage ======
-FROM rust:1.90.0-slim-bullseye AS builder
+# ===== Build stage =====
+FROM rust:1.90-slim-bullseye AS builder
 
-# Install build dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    pkg-config libssl-dev ca-certificates && \
-    rm -rf /var/lib/apt/lists/*
-
-WORKDIR /app
-
-# Cache dependencies
-COPY fantasy_age_discord_bot/Cargo.toml fantasy_age_discord_bot/Cargo.lock ./
-RUN mkdir src && echo "fn main() {}" > src/main.rs
-RUN cargo build --release; rm -rf src
-
-# Copy source and build release binary
-COPY fantasy_age_discord_bot/ .
-RUN cargo build --release
-
-# ====== Runtime stage ======
-FROM debian:bullseye-slim
-
-# Install runtime dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libssl1.1 \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+# Install MUSL and build dependencies
+RUN apt-get update && apt-get install -y musl-tools pkg-config && \
+    rustup target add x86_64-unknown-linux-musl
 
 WORKDIR /app
 
-# Copy binary from builder
-COPY --from=builder /app/target/release/fantasy_age_discord_bot .
+# Copy manifest files for dependency caching
+COPY fantasy_age_discord_bot/Cargo.toml fantasy_age_discord_bot/Cargo.lock ./fantasy_age_discord_bot/
+COPY fantasy_age_discord_bot/src ./fantasy_age_discord_bot/src
 
-# Ensure binary is executable
-RUN chmod +x fantasy_age_discord_bot
+# Build dependencies only
+WORKDIR /app/fantasy_age_discord_bot
+RUN cargo build --release --target x86_64-unknown-linux-musl || true
 
-# Default command
-CMD ["./fantasy_age_discord_bot"]
+# Rebuild with actual source
+COPY fantasy_age_discord_bot/ ./
+RUN cargo build --release --target x86_64-unknown-linux-musl
+
+# ===== Runtime stage (zero-dependency) =====
+FROM scratch
+
+# Bring in certificates (Discord requires HTTPS)
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+
+# Copy statically linked Rust binary
+COPY --from=builder /app/fantasy_age_discord_bot/target/x86_64-unknown-linux-musl/release/fantasy_age_discord_bot /
+
+# Set the startup command
+ENTRYPOINT ["/fantasy_age_discord_bot"]
