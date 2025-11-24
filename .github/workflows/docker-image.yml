@@ -15,22 +15,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Verify SSH secrets
-        run: |
-          if [ -z "${{ secrets.LIGHTSAIL_HOST }}" ]; then
-            echo "ERROR: LIGHTSAIL_HOST secret is missing!"
-            exit 1
-          fi
-          if [ -z "${{ secrets.LIGHTSAIL_USER }}" ]; then
-            echo "ERROR: LIGHTSAIL_USER secret is missing!"
-            exit 1
-          fi
-          if [ -z "${{ secrets.SSH_PRIVATE_KEY }}" ]; then
-            echo "ERROR: SSH_PRIVATE_KEY secret is missing!"
-            exit 1
-          fi
-          echo "All SSH secrets are set."
-
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -57,13 +41,11 @@ jobs:
           echo "Building and pushing image: $IMAGE_NAME"
 
           docker buildx build \
-            --file .devcontainer/Dockerfile \
+            --file Dockerfile \
             --cache-from type=local,src=/tmp/.buildx-cache \
             --cache-to type=local,dest=/tmp/.buildx-cache-new \
             --tag $IMAGE_NAME \
             --push .
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Deploy to AWS Lightsail
         uses: appleboy/ssh-action@v1.0.3
@@ -72,19 +54,18 @@ jobs:
           username: ${{ secrets.LIGHTSAIL_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
-          envs: DISCORD_TOKEN
           script: |
-            OWNER="Ravoos"
+            OWNER="${{ github.repository_owner }}"
             IMAGE_NAME="ghcr.io/${OWNER,,}/discordbotfantasyage:latest"
 
             echo "Pulling Docker image $IMAGE_NAME..."
             docker pull $IMAGE_NAME || true
 
-            echo "Stopping old container if exists..."
+            echo "Stopping old container..."
             docker stop fantasy_age_discord_bot || true
             docker rm fantasy_age_discord_bot || true
 
-            echo "Running new container..."
+            echo "Starting new container..."
             docker run -d \
               --name fantasy_age_discord_bot \
               --restart unless-stopped \
