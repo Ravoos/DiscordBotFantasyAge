@@ -24,14 +24,16 @@ COPY fantasy_age_discord_bot/src ./src
 # Build final binary
 RUN cargo build --release --target x86_64-unknown-linux-musl
 
-# ===== Runtime stage =====
+# Runtime stage
 FROM debian:bullseye-slim
 
-# Install certificates
-RUN apt-get update && apt-get install -y ca-certificates && \
+# Install certificates and Python3
+RUN apt-get update && \
+    apt-get install -y ca-certificates python3 && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
+
 
 # Copy binary from builder
 COPY --from=builder /app/fantasy_age_discord_bot/target/x86_64-unknown-linux-musl/release/fantasy_age_discord_bot .
