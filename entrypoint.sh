@@ -1,20 +1,18 @@
 #!/bin/sh
 set -e
 
-echo "Starting Discord bot..."
-
+# Check Discord token
 if [ -z "$DISCORD_TOKEN" ]; then
-    echo "ERROR: DISCORD_TOKEN is not set!"
-    exit 1
+  echo "ERROR: DISCORD_TOKEN not set!"
+  exit 1
 fi
 
+echo "Starting Discord bot..."
 echo "DISCORD_TOKEN length: ${#DISCORD_TOKEN}"
 
-# Start Discord bot in background
-./fantasy_age_discord_bot &
-
-# Start minimal Python HTTP server to satisfy Cloud Run
+# Start dummy HTTP server in background for Cloud Run health checks
 PORT=${PORT:-8080}
-echo "Starting dummy HTTP server on port $PORT"
+python3 -m http.server $PORT &
 
-exec python3 -m http.server "$PORT"
+# Start bot as the main foreground process
+exec ./fantasy_age_discord_bot
