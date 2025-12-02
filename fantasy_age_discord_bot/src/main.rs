@@ -1,3 +1,4 @@
+mod http_health;
 use serenity::{
     all::{CreateInteractionResponseMessage, Interaction},
     async_trait,
