@@ -1,20 +1,15 @@
 # ===== Build stage =====
 FROM rust:1.90-slim-bullseye AS builder
 
-# Install MUSL target and build dependencies
-RUN apt-get update && apt-get install -y musl-tools pkg-config && \
-    rustup target add x86_64-unknown-linux-musl
 WORKDIR /app
-
-# Copy manifest first for caching
 COPY fantasy_age_discord_bot/Cargo.toml fantasy_age_discord_bot/Cargo.lock ./fantasy_age_discord_bot/
 
 # Dummy src to build dependencies
-RUN mkdir -p fantasy_age_discord_bot/src && \
-    echo "fn main() {}" > fantasy_age_discord_bot/src/main.rs
+RUN mkdir -p fantasy_age_discord_bot/src && echo "fn main() {}" > fantasy_age_discord_bot/src/main.rs
 
-# Build dependencies
 WORKDIR /app/fantasy_age_discord_bot
+RUN rustup target add x86_64-unknown-linux-musl
+RUN apt-get update && apt-get install -y musl-tools pkg-config
 RUN cargo build --release --target x86_64-unknown-linux-musl || true
 
 # Copy real source code
@@ -23,22 +18,15 @@ COPY fantasy_age_discord_bot/src ./src
 # Build final binary
 RUN cargo build --release --target x86_64-unknown-linux-musl
 
-# ===== Runtime stage =====
-FROM debian:bullseye-slim
-
-# Install Python for dummy HTTP server and certificates
-RUN apt-get update && apt-get install -y python3 ca-certificates && \
-    rm -rf /var/lib/apt/lists/*
+# Runtime stage
+FROM gcr.io/distroless/cc
 WORKDIR /app
 
-# Copy bot binary
+# Copy binary
 COPY --from=builder /app/fantasy_age_discord_bot/target/x86_64-unknown-linux-musl/release/fantasy_age_discord_bot .
 
-# Copy entrypoint
-COPY entrypoint.sh .
+# Set environment variable placeholder
+ENV DISCORD_TOKEN=""
 
-# Make everything executable
-RUN chmod +x fantasy_age_discord_bot entrypoint.sh
-
-# Cloud Run CMD
-CMD ["./entrypoint.sh"]
+# Run bot
+CMD ["./fantasy_age_discord_bot"]

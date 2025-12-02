@@ -144,6 +144,9 @@ async fn main() -> Result<()> {
     dotenv().ok();
     tracing_subscriber::fmt::init();
 
+    // Start Cloud Run health server
+    http_health::start_health_server();
+
     tracing::info!("Bot starting...");
 
     let token = match env::var("DISCORD_TOKEN") {
