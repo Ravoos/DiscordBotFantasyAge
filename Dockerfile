@@ -1,33 +1,45 @@
-# Stage 1: Build
-FROM node:20-bullseye AS build
+# ===== Build stage =====
+FROM rust:1.90-slim-bullseye AS builder
 
-# Install build tools (needed for native modules)
-RUN apt-get update && apt-get install -y \
-    python3 \
-    make \
-    g++ \
-    git \
-    && rm -rf /var/lib/apt/lists/*
+# Install MUSL target and build dependencies
+RUN apt-get update && apt-get install -y musl-tools pkg-config && \
+    rustup target add x86_64-unknown-linux-musl && \
+    rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
-# Copy package files first to leverage caching
-COPY package*.json ./
+# Copy manifest first for caching
+COPY fantasy_age_discord_bot/Cargo.toml \
+     fantasy_age_discord_bot/Cargo.lock \
+     ./fantasy_age_discord_bot/
 
-# Install production dependencies
-RUN npm install --production
+# Create dummy src to build dependencies only
+RUN mkdir -p fantasy_age_discord_bot/src && \
+    echo "fn main() {}" > fantasy_age_discord_bot/src/main.rs
+WORKDIR /app/fantasy_age_discord_bot
 
-# Copy the rest of the source code
-COPY . .
+# Build dependencies only
+RUN cargo build --release --target x86_64-unknown-linux-musl || true
 
-# Stage 2: Final image
-FROM node:20-bullseye-slim
+# Copy real source code
+COPY fantasy_age_discord_bot/src ./src
+
+# Build final binary
+RUN cargo build --release --target x86_64-unknown-linux-musl
+
+# ===== Runtime stage =====
+FROM debian:bullseye-slim
+
+# Install runtime dependencies (only certificates)
+RUN apt-get update && apt-get install -y ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
-# Copy built node_modules and source code from build stage
-COPY --from=build /app /app
+# Copy the binary and entrypoint
+COPY --from=builder /app/fantasy_age_discord_bot/target/x86_64-unknown-linux-musl/release/fantasy_age_discord_bot .
+COPY entrypoint.sh .
 
-# Set environment variable for Cloud Run
-ENV PORT=8080
+# Make executable
+RUN chmod +x fantasy_age_discord_bot entrypoint.sh
 
-# Start bot
-CMD ["node", "index.js"]
+# Run the bot
+CMD ["./entrypoint.sh"]
