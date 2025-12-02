@@ -1,11 +1,12 @@
 # Stage 1: Build
 FROM node:20-slim AS build
-
 WORKDIR /app
 
 # Copy only package files first for better caching
 COPY package*.json ./
-RUN npm ci --only=production
+
+# Install dependencies (switching to npm install to avoid lock issues)
+RUN npm install --only=production
 COPY . .
 
 # Stage 2: Final image
