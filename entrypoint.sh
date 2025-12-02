@@ -10,9 +10,12 @@ fi
 echo "Starting Discord bot..."
 echo "DISCORD_TOKEN length: ${#DISCORD_TOKEN}"
 
-# Start dummy HTTP server in background for Cloud Run health checks
+# Port for Cloud Run health checks
 PORT=${PORT:-8080}
-python3 -m http.server $PORT &
 
-# Start bot as the main foreground process
+# Start a minimal HTTP server in the background using nohup
+# Logs go to /dev/null to avoid blocking
+nohup sh -c "while true; do { echo -e 'HTTP/1.1 200 OK\r\n'; } | nc -l -p $PORT -q 1; done" >/dev/null 2>&1 &
+
+# Start the Discord bot as the **foreground process**
 exec ./fantasy_age_discord_bot
