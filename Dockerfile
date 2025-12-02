@@ -1,46 +1,20 @@
-# ===== Build stage =====
-FROM rust:1.90-slim-bullseye AS builder
-
-# Install MUSL target and build dependencies
-RUN apt-get update && apt-get install -y musl-tools pkg-config && \
-    rustup target add x86_64-unknown-linux-musl
+# Stage 1: Build
+FROM node:20-slim AS build
 
 WORKDIR /app
 
-# Copy manifest first for caching
-COPY fantasy_age_discord_bot/Cargo.toml fantasy_age_discord_bot/Cargo.lock ./fantasy_age_discord_bot/
+# Copy only package files first for better caching
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
 
-# Create dummy src to force dependency build
-RUN mkdir -p fantasy_age_discord_bot/src && \
-    echo "fn main() {}" > fantasy_age_discord_bot/src/main.rs
-
-# Build dependencies
-WORKDIR /app/fantasy_age_discord_bot
-RUN cargo build --release --target x86_64-unknown-linux-musl || true
-
-# Copy real source
-COPY fantasy_age_discord_bot/src ./src
-
-# Build final binary
-RUN cargo build --release --target x86_64-unknown-linux-musl
-
-# ===== Runtime stage =====
-FROM debian:bullseye-slim
-
-# Install certificates
-RUN apt-get update && apt-get install -y ca-certificates && \
-    rm -rf /var/lib/apt/lists/*
-
+# Stage 2: Final image
+FROM node:20-slim
 WORKDIR /app
 
-# Copy binary from builder
-COPY --from=builder /app/fantasy_age_discord_bot/target/x86_64-unknown-linux-musl/release/fantasy_age_discord_bot .
+# Copy only necessary files from build stage
+COPY --from=build /app .
+ENV PORT=8080
 
-# Copy entrypoint script
-COPY entrypoint.sh .
-
-# Make everything executable
-RUN chmod +x fantasy_age_discord_bot entrypoint.sh
-
-# Use wrapper for logging & safe start
-CMD ["./entrypoint.sh"]
+# Run the bot
+CMD ["node", "index.js"]
