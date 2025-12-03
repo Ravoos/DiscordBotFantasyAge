@@ -1,58 +1,62 @@
-use lambda_http::{handler, lambda_runtime::{self, Context, Error}, Body, Request, Response};
+mod http_health;
+use serenity::{
+    all::{CreateInteractionResponseMessage, Interaction},
+    async_trait,
+    builder::{CreateCommand, CreateCommandOption, CreateInteractionResponse},
+    model::{
+        application::{CommandDataOptionValue, CommandOptionType},
+        gateway::Ready,
+    },
+    prelude::*,
+};
+use anyhow::Result;
 use rand::Rng;
 use regex::Regex;
-use serde_json::{json, Value};
-use std::collections::HashMap;
+use dotenv::dotenv;
+use std::{collections::HashMap, env};
+use tokio::time::{sleep, Duration};
 
 struct Handler;
 
-async fn func(event: Request, _: Context) -> Result<Response<Body>, Error> {
-    // Parse Discord interaction JSON
-    let body: Value = serde_json::from_slice(event.body().as_ref())?;
-    let command_name = body
-        .get("data")
-        .and_then(|d| d.get("name"))
-        .and_then(|v| v.as_str())
-        .unwrap_or("");
+#[async_trait]
+impl EventHandler for Handler {
+    async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
+        if let Interaction::Command(command) = interaction {
+            let response = match command.data.name.as_str() {
+                "mainroll" => {
+                    let modifier: i32 = match command.data.options.get(0).map(|opt| &opt.value) {
+                        Some(CommandDataOptionValue::Integer(i)) => *i as i32,
+                        _ => 0,
+                    };
+                    main_dice_roller(modifier)
+                }
+                "damageroll" => {
+                    let expr: String = match command.data.options.get(0).map(|opt| &opt.value) {
+                        Some(CommandDataOptionValue::String(s)) => s.clone(),
+                        _ => "1d6".to_string(),
+                    };
+                    damage_dice_roller(&expr)
+                }
+                _ => "Unknown command.".to_string(),
+            };
 
-    // Determine command output
-    let content = match command_name {
-        "mainroll" => {
-            // Extract optional modifier
-            let modifier = body.get("data")
-                .and_then(|d| d.get("options"))
-                .and_then(|opts| opts.get(0))
-                .and_then(|opt| opt.get("value"))
-                .and_then(|v| v.as_i64())
-                .unwrap_or(0) as i32;
-
-            main_dice_roller(modifier)
+            if let Err(why) = command
+                .create_response(
+                    &ctx.http,
+                    CreateInteractionResponse::Message(
+                        CreateInteractionResponseMessage::new().content(&response),
+                    ),
+                )
+                .await
+            {
+                tracing::error!("Error sending slash command response: {:?}", why);
+            }
         }
-        "damageroll" => {
-            // Extract roll expression
-            let expr = body.get("data")
-                .and_then(|d| d.get("options"))
-                .and_then(|opts| opts.get(0))
-                .and_then(|opt| opt.get("value"))
-                .and_then(|v| v.as_str())
-                .unwrap_or("1d6");
+    }
 
-            damage_dice_roller(expr)
-        }
-        _ => "Unknown command.".to_string(),
-    };
-
-    // Respond in Discord interaction format
-    let resp = json!({
-        "type": 4, // CHANNEL_MESSAGE_WITH_SOURCE
-        "data": { "content": content }
-    });
-
-    Ok(Response::builder()
-        .status(200)
-        .header("Content-Type", "application/json")
-        .body(Body::Text(resp.to_string()))
-        .unwrap())
+    async fn ready(&self, _: Context, ready: Ready) {
+        tracing::info!("{} is connected!", ready.user.name);
+    }
 }
 
 fn register_main_roll_command() -> CreateCommand {
@@ -137,7 +141,79 @@ fn roll_d6(num: u32) -> Vec<u32> {
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Error> {
-    lambda_runtime::run(handler(func)).await?;
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    dotenv().ok();
+    tracing_subscriber::fmt::init();
+
+    // Spawn health server
+    tokio::spawn(async {
+        if let Err(e) = http_health::start_health_server().await {
+            eprintln!("Health server error: {}", e);
+        }
+    });
+
+    // Load Discord token
+    let token = match env::var("DISCORD_TOKEN") {
+        Ok(t) => t,
+        Err(_) => {
+            tracing::error!("DISCORD_TOKEN is not set!");
+            loop { sleep(Duration::from_secs(10)).await; }
+        }
+    };
+    tracing::info!("DISCORD_TOKEN length: {}", token.len());
+
+    let intents = GatewayIntents::GUILDS;
+
+    // Create Discord client with retry
+    let mut client = loop {
+        match Client::builder(&token, intents)
+            .event_handler(Handler)
+            .await
+        {
+            Ok(c) => break c,
+            Err(err) => {
+                tracing::error!("Failed to create Discord client: {:?}, retrying in 10s...", err);
+                sleep(Duration::from_secs(10)).await;
+            }
+        }
+    };
+
+    // Register global commands with retry
+    loop {
+        match serenity::model::application::Command::set_global_commands(
+            &client.http,
+            vec![
+                register_main_roll_command(),
+                CreateCommand::new("damageroll")
+                    .description("Roll Xd6 + Y damage")
+                    .add_option(
+                        CreateCommandOption::new(
+                            CommandOptionType::String,
+                            "roll",
+                            "Dice roll, e.g., 2d6+3",
+                        )
+                        .required(true),
+                    ),
+            ],
+        ).await
+        {
+            Ok(_) => {
+                tracing::info!("Registered global commands successfully.");
+                break;
+            }
+            Err(err) => {
+                tracing::error!("Failed to register global commands: {:?}, retrying in 10s...", err);
+                sleep(Duration::from_secs(10)).await;
+            }
+        }
+    }
+
+    // Start the Discord client (blocking)
+    tracing::info!("Starting Discord client event loop...");
+    if let Err(why) = client.start().await {
+        tracing::error!("Client error: {:?}", why);
+        loop { sleep(Duration::from_secs(10)).await; }
+    }
+
     Ok(())
 }
