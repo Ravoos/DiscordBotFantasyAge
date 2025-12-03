@@ -1,4 +1,4 @@
-use tiny_http::{Server, Response}
+use tiny_http::{Server, Response};
 
 pub fn start_health_server(){
     let port = std::env::var("PORT").unwrap_or_else(|_| "8080".into());

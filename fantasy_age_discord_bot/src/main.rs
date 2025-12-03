@@ -74,7 +74,7 @@ fn register_main_roll_command() -> CreateCommand {
 
 fn main_dice_roller(modifier: i32) -> String {
     let rolls = roll_d6(3);
-    let base_total: i32 = rolls.iter().sum();
+    let base_total: i32 = rolls.iter().map(|&x| x as i32).sum();
     let final_amount = base_total + modifier;
 
     let mut counts = HashMap::new();
@@ -115,7 +115,7 @@ fn damage_dice_roller(input: &str) -> String {
             .unwrap_or(0);
 
         let rolls = roll_d6(num_dice);
-        let base_total: i32 = rolls.iter().sum();
+        let base_total: i32 = rolls.iter().map(|&x| x as i32).sum();
         let total = base_total + modifier;
 
         let modifier_str = if modifier == 0 {
@@ -136,8 +136,8 @@ fn damage_dice_roller(input: &str) -> String {
 }
 
 fn roll_d6(num: u32) -> Vec<u32> {
-    let mut rng = rand::thread_rng();
-    (0..num).map(|_| rng.gen_range(1..=6)).collect()
+    let mut rng = rand::rng();
+    (0..num).map(|_| rng.random_range(1..=6)).collect()
 }
 
 #[tokio::main]
