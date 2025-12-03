@@ -146,7 +146,7 @@ async fn main() -> Result<()> {
     tracing_subscriber::fmt::init();
 
     // Start Cloud Run health server
-    http_health::start_health_server();
+    http_health::start_health_server().await;
 
     tracing::info!("Bot starting...");
 
