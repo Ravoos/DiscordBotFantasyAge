@@ -141,71 +141,78 @@ fn roll_d6(num: u32) -> Vec<u32> {
 }
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv().ok();
     tracing_subscriber::fmt::init();
 
-    // Start Cloud Run health server
-    http_health::start_health_server();
+    // Spawn health server
+    tokio::spawn(async {
+        if let Err(e) = http_health::start_health_server().await {
+            eprintln!("Health server error: {}", e);
+        }
+    });
 
-    tracing::info!("Bot starting...");
-
+    // Load Discord token
     let token = match env::var("DISCORD_TOKEN") {
         Ok(t) => t,
         Err(_) => {
             tracing::error!("DISCORD_TOKEN is not set!");
-            loop {
-                sleep(Duration::from_secs(10)).await;
-            }
+            loop { sleep(Duration::from_secs(10)).await; }
         }
     };
     tracing::info!("DISCORD_TOKEN length: {}", token.len());
 
     let intents = GatewayIntents::GUILDS;
 
-    // Client creation with logging and loop on failure
-    let mut client = match Client::builder(&token, intents)
-        .event_handler(Handler)
-        .await
-    {
-        Ok(c) => c,
-        Err(err) => {
-            tracing::error!("Failed to create Discord client: {:?}", err);
-            loop {
+    // Create Discord client with retry
+    let mut client = loop {
+        match Client::builder(&token, intents)
+            .event_handler(Handler)
+            .await
+        {
+            Ok(c) => break c,
+            Err(err) => {
+                tracing::error!("Failed to create Discord client: {:?}, retrying in 10s...", err);
                 sleep(Duration::from_secs(10)).await;
             }
         }
     };
 
-    // Register global commands safely
-    match serenity::model::application::Command::set_global_commands(
-        &client.http,
-        vec![
-            register_main_roll_command(),
-            CreateCommand::new("damageroll")
-                .description("Roll Xd6 + Y damage")
-                .add_option(
-                    CreateCommandOption::new(
-                        CommandOptionType::String,
-                        "roll",
-                        "Dice roll, e.g., 2d6+3",
-                    )
-                    .required(true),
-                ),
-        ],
-    )
-    .await
-    {
-        Ok(_) => tracing::info!("Registered global commands successfully."),
-        Err(err) => tracing::error!("Failed to register global commands: {:?}", err),
+    // Register global commands with retry
+    loop {
+        match serenity::model::application::Command::set_global_commands(
+            &client.http,
+            vec![
+                register_main_roll_command(),
+                CreateCommand::new("damageroll")
+                    .description("Roll Xd6 + Y damage")
+                    .add_option(
+                        CreateCommandOption::new(
+                            CommandOptionType::String,
+                            "roll",
+                            "Dice roll, e.g., 2d6+3",
+                        )
+                        .required(true),
+                    ),
+            ],
+        ).await
+        {
+            Ok(_) => {
+                tracing::info!("Registered global commands successfully.");
+                break;
+            }
+            Err(err) => {
+                tracing::error!("Failed to register global commands: {:?}, retrying in 10s...", err);
+                sleep(Duration::from_secs(10)).await;
+            }
+        }
     }
 
+    // Start the Discord client (blocking)
     tracing::info!("Starting Discord client event loop...");
     if let Err(why) = client.start().await {
         tracing::error!("Client error: {:?}", why);
-        loop {
-            sleep(Duration::from_secs(10)).await;
-        }
+        loop { sleep(Duration::from_secs(10)).await; }
     }
 
     Ok(())
