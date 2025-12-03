@@ -1,4 +1,4 @@
-name: Deploy Discord Bot to Cloud Run
+name: Deploy Discord Bot to AWS Lambda
 
 on:
   push:
@@ -6,23 +6,22 @@ on:
 
 jobs:
   deploy:
-    name: Build & Deploy
     runs-on: ubuntu-latest
 
     permissions:
       contents: read
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup Rust
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
-          target: x86_64-unknown-linux-musl
-          profile: minimal
-          override: true
+          targets: "x86_64-unknown-linux-musl"
+
+      - name: Install MUSL tools
+        run: sudo apt-get update && sudo apt-get install -y musl-tools pkg-config libssl-dev build-essential
 
       - name: Cache Cargo
         uses: actions/cache@v3
@@ -32,34 +31,27 @@ jobs:
             ~/.cargo/git
             target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-
+          restore-keys: ${{ runner.os }}-cargo-
 
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v1
+      - name: Build release
+        run: cargo build --release --target x86_64-unknown-linux-musl
+
+      - name: Package Lambda
+        run: |
+          mkdir -p lambda
+          cp target/x86_64-unknown-linux-musl/release/discord-lambda-bot lambda/bootstrap
+          cd lambda
+          zip -r ../lambda.zip .
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Set default project
-        run: gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
-
-      - name: Configure Docker auth
-        run: gcloud auth configure-docker europe-north2-docker.pkg.dev --quiet
-
-      - name: Build and push container
+      - name: Deploy to Lambda
         run: |
-          IMAGE="europe-north2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/fantasy-age-discord-bot/fantasy-age-bot:latest"
-          docker build -t "$IMAGE" .
-          docker push "$IMAGE"
-
-      - name: Deploy to Cloud Run
-        run: |
-          IMAGE="europe-north2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/fantasy-age-discord-bot/fantasy-age-bot:latest"
-          gcloud run deploy fantasy-age-bot \
-            --image "$IMAGE" \
-            --region europe-north2 \
-            --platform managed \
-            --allow-unauthenticated \
-            --update-env-vars DISCORD_TOKEN="${{ secrets.DISCORD_TOKEN }}" \
-            --timeout=3600 \
-            --min-instances=1
+          aws lambda update-function-code \
+            --function-name discord_slash_handler \
+            --zip-file fileb://lambda.zip
