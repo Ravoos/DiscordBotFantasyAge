@@ -12,7 +12,7 @@ pub async fn start_health_server() -> Result<(), Box<dyn std::error::Error + Sen
             Ok::<_, Infallible>(Response::new(Body::from("OK")))
         }))
     });
-
+    
     println!("Health server running on {}", addr);
 
     Server::bind(&addr).serve(make_svc).await?;
