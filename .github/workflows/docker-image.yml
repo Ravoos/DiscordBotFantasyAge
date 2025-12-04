@@ -27,13 +27,13 @@ jobs:
 
       - name: Build & Push image
         run: |
-          IMAGE="europe-north2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/fantasy-age-discord-bot/fantasy-age-bot:${{ github.sha }}"
+          IMAGE="europe-north2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/discord-bot/fantasy-age-bot:${{ github.sha }}"
           docker build -t "$IMAGE" .
           docker push "$IMAGE"
 
       - name: Deploy to Cloud Run
         run: |
-          IMAGE="europe-north2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/fantasy-age-discord-bot/fantasy-age-bot:${{ github.sha }}"
+          IMAGE="europe-north2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/discord-bot/fantasy-age-bot:${{ github.sha }}"
           gcloud run deploy fantasy-age-bot \
             --image "$IMAGE" \
             --region europe-north2 \
