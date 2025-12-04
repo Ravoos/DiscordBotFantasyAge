@@ -19,7 +19,7 @@ COPY fantasy_age_discord_bot/src ./src
 RUN cargo build --release --target x86_64-unknown-linux-musl
 
 # ===== Runtime =====
-FROM gcr.io/distroless/static
+FROM gcr.io/distroless/cc-debian11
 WORKDIR /app
 COPY --from=builder /app/fantasy_age_discord_bot/target/x86_64-unknown-linux-musl/release/fantasy_age_discord_bot .
 
