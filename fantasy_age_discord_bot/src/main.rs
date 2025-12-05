@@ -12,12 +12,8 @@ use serenity::{
 use anyhow::Result;
 use rand::Rng;
 use regex::Regex;
-use dotenv::dotenv;
 use std::{collections::HashMap, env};
 use tokio::time::{sleep, Duration};
-use std::env;
-use std::time::Duration;
-use tokio::time::sleep;
 
 struct Handler;
 
@@ -139,8 +135,8 @@ fn damage_dice_roller(input: &str) -> String {
 }
 
 fn roll_d6(num: u32) -> Vec<u32> {
-    let mut rng = rand::thread_rng();
-    (0..num).map(|_| rng.gen_range(1..=6)).collect()
+    let mut rng = rand::rng();
+    (0..num).map(|_| rng.random_range(1..=6)).collect()
 }
 
 #[tokio::main]
