@@ -1,22 +1,33 @@
 # ===== Build stage =====
-FROM rust:1.79-slim AS builder
+FROM rust:1.90 AS builder
 
-# Install build dependencies
+# Install dependencies for MUSL + OpenSSL
 RUN apt-get update && apt-get install -y \
-    pkg-config libssl-dev ca-certificates build-essential
-WORKDIR /app
-COPY fantasy_age_discord_bot/ .
+    musl-tools \
+    pkg-config \
+    libssl-dev \
+    build-essential \
+    ca-certificates \
+    git \
+ && rustup target add x86_64-unknown-linux-musl
 
-# Build
-RUN cargo build --release
+WORKDIR /app
+COPY fantasy_age_discord_bot ./fantasy_age_discord_bot
+WORKDIR /app/fantasy_age_discord_bot
+
+# Build release binary with MUSL
+ENV OPENSSL_STATIC=1
+RUN cargo build --release --target x86_64-unknown-linux-musl
 
 # ===== Runtime stage =====
 FROM debian:12-slim
-RUN apt-get update && apt-get install -y ca-certificates && update-ca-certificates
-WORKDIR /app
-COPY --from=builder /app/target/release/fantasy_age_discord_bot .
+RUN apt-get update && apt-get install -y ca-certificates \
+ && update-ca-certificates \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
 
-# Cloud Run requires $PORT
+WORKDIR /app
+COPY --from=builder /app/fantasy_age_discord_bot/target/x86_64-unknown-linux-musl/release/fantasy_age_discord_bot .
 ENV PORT=8080
 EXPOSE 8080
 
