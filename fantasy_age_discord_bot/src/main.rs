@@ -97,6 +97,28 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         tracing::info!("DISCORD_TOKEN length: {}", token.len());
 
+        // Load Application ID (REQUIRED for global commands)
+        let application_id: u64 = match env::var("DISCORD_APPLICATION_ID") {
+            Ok(id_str) => match id_str.parse() {
+                Ok(id) => id,
+                Err(_) => {
+                    tracing::error!(
+                        "DISCORD_APPLICATION_ID is not a valid u64: {:?}",
+                        id_str
+                    );
+                    loop {
+                        sleep(Duration::from_secs(10)).await;
+                    }
+                }
+            },
+            Err(_) => {
+                tracing::error!("DISCORD_APPLICATION_ID is not set — bot will idle.");
+                loop {
+                    sleep(Duration::from_secs(10)).await;
+                }
+            }
+        };
+
         let intents = GatewayIntents::GUILDS;
 
         // Create Discord client with retry
@@ -115,6 +137,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }
             }
         };
+
+        // Set the application ID so global command registration works
+        client.http.set_application_id(application_id.into());
 
         // Register commands with retry
         loop {
@@ -171,3 +196,4 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
+
