@@ -1,5 +1,6 @@
 mod http_health;
 mod dice_rolls;
+mod fantasy_age_stunts;
 use serenity::{
     all::{CreateInteractionResponseMessage, Interaction},
     async_trait,
@@ -34,6 +35,20 @@ impl EventHandler for Handler {
                         _ => "1d6".to_string(),
                     };
                     dice_rolls::damage_dice_roller(&expr)
+                }
+                "basicstunts" => {
+                    let basic_stunt_name: String = match command.data.options.get(0).map(|opt| &opt.value) {
+                        Some(CommandDataOptionValue::String(s)) => s.clone(),
+                        _ => "".to_string(),
+                    };
+                    fantasy_age_stunts::get_basic_stunts(&basic_stunt_name)
+                }
+                "classstunts" => {
+                    let class_name: String = match command.data.options.get(0).map(|opt| &opt.value) {
+                        Some(CommandDataOptionValue::String(s)) => s.clone(),
+                        _ => "".to_string(),
+                    };
+                    fantasy_age_stunts::get_stunts_for_class(&class_name)
                 }
                 _ => "Unknown command.".to_string(),
             };
@@ -157,6 +172,26 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                             )
                             .required(true),
                         ),
+                    CreateCommand::new("basicstunts")
+                        .description("Get a list of the basic stunts available in Fantasy AGE")
+                        .add_option(
+                            CreateCommandOption::new(
+                                CommandOptionType::String,
+                                "type",
+                                "Type of basic stunts: combat, social, exploration, spell",
+                            )
+                        .required(true),
+                        ),
+                    CreateCommand::new("classstunts")
+                        .description("Get a list of stunts for a specific Fantasy AGE class")
+                        .add_option(
+                            CreateCommandOption::new(
+                                CommandOptionType::String,
+                                "class",
+                                "Class name: warrior, rogue, mage, envoy",
+                            )
+                        .required(true),
+                        )
                 ],
             )
             .await
