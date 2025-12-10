@@ -6,27 +6,24 @@ use serenity::builder::{
 use serenity::model::application::CommandInteraction;
 use serenity::prelude::Context;
 
-/// Splits long string into Discord-safe chunks (max 2000 chars)
-fn split_into_discord_chunks(input: &str) -> Vec<String> {
+fn split_discord_safe(input: &str) -> Vec<String> {
     const LIMIT: usize = 1900;
-
-    let mut messages = Vec::new();
+    let mut chunks = Vec::new();
     let mut current = String::new();
 
-    for line in input.lines() {
-        if current.len() + line.len() + 1 > LIMIT {
-            messages.push(current);
+    for c in input.chars() {
+        if current.chars().count() >= LIMIT {
+            chunks.push(current);
             current = String::new();
         }
-        current.push_str(line);
-        current.push('\n');
+        current.push(c);
     }
 
     if !current.is_empty() {
-        messages.push(current);
+        chunks.push(current);
     }
 
-    messages
+    chunks
 }
 
 /// Sends long text by splitting it across multiple Discord messages.
@@ -35,24 +32,32 @@ pub async fn send_long_response(
     command: &CommandInteraction,
     text: &str,
 ) -> serenity::Result<()> {
-    let chunks = split_into_discord_chunks(text);
 
-    // 1) FIRST CHUNK → initial interaction response
+    // STEP 1: Defer the reply (acknowledge the interaction)
     command
         .create_response(
             &ctx.http,
-            CreateInteractionResponse::Message(
-                CreateInteractionResponseMessage::new().content(&chunks[0]),
-            ),
+            CreateInteractionResponse::Defer(CreateInteractionResponseMessage::new())
         )
         .await?;
 
-    // 2) REMAINING CHUNKS → follow-up messages
-    for chunk in chunks.iter().skip(1) {
+    // STEP 2: Break text into 1900-char chunks
+    let chunks = split_discord_safe(text);
+
+    // STEP 3: First chunk is the "edit" to the deferred reply
+    command
+        .edit_response(
+            &ctx.http,
+            serenity::builder::EditInteractionResponse::new().content(chunks[0].clone())
+        )
+        .await?;
+
+    // STEP 4: Remaining chunks are follow ups
+    for chunk in chunks.into_iter().skip(1) {
         command
             .create_followup(
                 &ctx.http,
-                CreateWebhookMessage::new().content(chunk),
+                CreateWebhookMessage::new().content(chunk)
             )
             .await?;
     }
