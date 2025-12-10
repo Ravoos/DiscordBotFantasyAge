@@ -4,7 +4,7 @@ pub fn get_stunts_for_class(class_name: &str) -> String {
         "rogue" => ROGUE_SPECIFIC_STUNTS,
         "mage" => MAGE_SPECIFIC_STUNTS,
         "envoy" => ENVOY_SPECIFIC_STUNTS,
-        _ => return format!("Unknown class: {}. Available classes are Warrior, Rogue, Mage.", class_name),
+        _ => return format!("Unknown class: {}. Available classes are 'warrior', 'rogue', 'mage' and 'envoy'.", class_name),
     };
 
     let mut output = format!("Stunts for {}:\n", class_name);
@@ -20,7 +20,7 @@ pub fn get_basic_stunts(basic_stunt_type: &str) -> String {
         "social" => BASIC_SOCIAL_STUNTS,
         "exploration" => BASIC_EXPLORATION_STUNTS,
         "spell" => BASIC_SPELL_STUNTS,
-        _ => return format!("Unknown stunt type: {}. Available types are 'combat' and 'social'.", basic_stunt_type),
+        _ => return format!("Unknown stunt type: {}. Available types are 'combat', 'social', 'exploration' and 'spell'.", basic_stunt_type),
     };
 
     let mut output = format!("Stunts for {}:\n", basic_stunt_type);
@@ -34,212 +34,117 @@ static BASIC_COMBAT_STUNTS: &[&str] = &[
     "***BOOST:*** 1-3 SP Cost, You gain +1 bonus per SP spent on your first test on your next turn.",
     "***RAPID RELOAD (Ranged):*** 1 SP Cost, You can immidetly reload a missle weapon as a free action.",
     "***SKIRMISH:*** 1-3 SP Cost, You can move yourself or the target of your attack 2 yards in any direction for each 1 SP you spend.",
-    "***STAY AWARE:*** 1 SP Cost, Make a simple TN 11 Perception test with the focus of your choice. If you succeed, the GM either gives you a new
-    piece of information you noticed, or you gain a +1 bonus to the next test you make (as long as it is before the end of your next turn).",
-    "***DISARM:*** 2 SP Cost, You and your opponent must make an opposed attack roll. If you win the test, you can knock your enemy’s weapon to
-    the ground, sending it 1d6 + Strength yards away in a direction you choose.",
-    "***GRAB (Melee):*** 2 SP Cost, You grapple with your enemy. You and your target make opposed Accuracy (Brawling) tests. If you win, you grab
-    your target and they can't move out of your reach until after your next turn. On subsequent turns, you may use a minor action
-    to maintain the grab, preventing them from moving away from you as long as you make another successful opposed simple
-    Accuracy (Brawling) test with your target, though your target rolls this test as a reaction—they don't need to use an action to try
-    to break free. Grabbing a foe doesn't prevent them from attacking, casting spells, or taking other actions—they just have to stay
-    adjacent to you while doing it.",
-    "***KNOCK PRONE:*** 2 SP Cost, You and your opponent must make an opposed attack roll. If you win the test, you can knock your enemy Prone,
-    as the condition.",
+    "***STAY AWARE:*** 1 SP Cost, Make a simple TN 11 Perception test with the focus of your choice. If you succeed, the GM either gives you a new piece of information you noticed, or you gain a +1 bonus to the next test you make (as long as it is before the end of your next turn).",
+    "***DISARM:*** 2 SP Cost, You and your opponent must make an opposed attack roll. If you win the test, you can knock your enemy's weapon to the ground, sending it 1d6 + Strength yards away in a direction you choose.",
+    "***GRAB (Melee):*** 2 SP Cost, You grapple with your enemy. You and your target make opposed Accuracy (Brawling) tests. If you win, you grab your target and they can't move out of your reach until after your next turn. On subsequent turns, you may use a minor action to maintain the grab, preventing them from moving away from you as long as you make another successful opposed simple Accuracy (Brawling) test with your target, though your target rolls this test as a reaction—they don't need to use an action to try to break free. Grabbing a foe doesn't prevent them from attacking, casting spells, or taking other actions—they just have to stay adjacent to you while doing it.",
+    "***KNOCK PRONE:*** 2 SP Cost, You and your opponent must make an opposed attack roll. If you win the test, you can knock your enemy Prone, as the condition.",
     "***MIGHTY BLOW:*** 2 SP Cost, You inflict an extra 1d6 damage with your attack.",
     "***PIERCE ARMOR:*** 2 SP Cost, You find a weakness in your enemy's armor. The target's Armor Rating is halved (rounded down) versus your attack.",
-    "***PIN (Grabbed):*** 2 SP Cost, If you currently hold a target by using the Grab stunt and use this stunt as well (this doesn't have to be from the
-    same attack as the grab), they also acquire the Defenseless condition (see Chapter 2). If you release the grab or they break free
-    from it, they stop being Defenseless.",
+    "***PIN (Grabbed):*** 2 SP Cost, If you currently hold a target by using the Grab stunt and use this stunt as well (this doesn't have to be from the same attack as the grab), they also acquire the Defenseless condition (see Chapter 2). If you release the grab or they break free from it, they stop being Defenseless.",
     "***DEFENSIVE STRIKE:*** 3 SP Cost, Gain a +4 bonus to Defense until the beginning of your next turn.",
-    "***LIGHTNING ATTACK:*** 3 SP Cost, You can make a second attack (against the same enemy or a different one within range and sight). You must
-    have a loaded missile weapon to make a ranged attack with this stunt.",
-    "***CRUSHING BLOW:*** 4 SP Cost, Your attack is strong or well-placed enough to compromise your enemy's armor or tough skin. You reduce
-    your target's Armor Rating by 2 or damage their shield so it provides no Defense bonus. Against natural Armor Ratings, this
-    represents a wound that makes the foe more vulnerable, and if the GM decides this stunt doesn't work on them, they should
-    offer you a chance to spend SP on a different stunt. The penalty can be removed with an hour of repair work for worn armor, or
-    an hour of rest for a natural AR. You can use this stunt multiple times to further reduce a target's Armor Rating.",
-    "***SIZE THE INITIATIVE:*** 4 SP Cost, Your attack changes the tempo of the battle. You move to the top of the initiative order—your new rating
-    becomes the previous highest initiative roll + 1. This means you may get to take another turn before some of the combatants get to
-    act again. You remain at the top of the order until someone else seizes the initiative or otherwise increases their rating above yours.",
+    "***LIGHTNING ATTACK:*** 3 SP Cost, You can make a second attack (against the same enemy or a different one within range and sight). You must have a loaded missile weapon to make a ranged attack with this stunt.",
+    "***CRUSHING BLOW:*** 4 SP Cost, Your attack is strong or well-placed enough to compromise your enemy's armor or tough skin. You reduce your target's Armor Rating by 2 or damage their shield so it provides no Defense bonus. Against natural Armor Ratings, this represents a wound that makes the foe more vulnerable, and if the GM decides this stunt doesn't work on them, they should offer you a chance to spend SP on a different stunt. The penalty can be removed with an hour of repair work for worn armor, or an hour of rest for a natural AR. You can use this stunt multiple times to further reduce a target's Armor Rating.",
+    "***SIZE THE INITIATIVE:*** 4 SP Cost, Your attack changes the tempo of the battle. You move to the top of the initiative order—your new rating becomes the previous highest initiative roll + 1. This means you may get to take another turn before some of the combatants get to act again. You remain at the top of the order until someone else seizes the initiative or otherwise increases their rating above yours.",
     "***LETHAL BLOW:*** 5 SP Cost, You inflict an extra 2d6 damage with your attack."
 ];
 
 static BASIC_SOCIAL_STUNTS: &[&str] = &[
     "***IMPRESS:*** 1-3 SP Cost, You gain +1 per SP spent to your next social test involving the same target during the same encounter.",
-    "***READ THE SITUATION:*** 1+ SP Cost, Unless others are trying to hide their feelings, you can tell what they are. Each SP spent tells you the
-    Attitude of one person in the vicinity unless they are actively trying to hide it from you.",
-    "***CROWD APPEAL:*** 2+ SP Cost, Your social action also affects one additional person per 2 SP spent, as long as their Willpower is equal to or
-    less than your Communication. This doesn’t allow the effects of other stunts to affect more than one person, however.",
-    "***HIDDEN MESSAGE:*** 2 SP Cost, Your social action conveys a simple, secret message to one other person, which might be your target or a
-    bystander. Others can detect this subterfuge with a Communication (Empathy) test with a TN equal to or greater than your
-    successful roll.",
-    "***TAUNT:*** 2 SP Cost, You insult or distract one opponent of your choice within 10 yards of you. You must make an opposed test of your
-    Communication (Deception) vs. the target’s Willpower (Self-Discipline). If you win, the target suffers a –1 penalty to all
-    opposed tests until the end of the current social encounter, or until they successfully taunt or undermine you. If used in
-    combat, the target suffers a –1 penalty on attack rolls and casting rolls on their next turn.",
-    "***SPOT TELLS:*** 3 SP Cost, Your interaction gives you a sense of how your target might deceive you. The TN for their next test to lie or
-    otherwise trick you is the standard TN or opposed roll, or the successful social roll, whichever is higher. This benefit lasts
-    until the target fails in an attempt to lie or the encounter ends, whichever comes first.",
-    "***PAY ATTENTION:*** 3 SP Cost, Your interaction reveals information about your target beyond even what you might have been looking for.
-    If you’re pursuing an investigation, you gain an additional lead.",
-    "***SWAY:*** 4 SP Cost, Your social gesture is especially potent. You shift your target’s Attitude an additional step in the direction of your choice.",
+    "***READ THE SITUATION:*** 1+ SP Cost, Unless others are trying to hide their feelings, you can tell what they are. Each SP spent tells you the Attitude of one person in the vicinity unless they are actively trying to hide it from you.",
+    "***CROWD APPEAL:*** 2+ SP Cost, Your social action also affects one additional person per 2 SP spent, as long as their Willpower is equal to or less than your Communication. This doesn't allow the effects of other stunts to affect more than one person, however.",
+    "***HIDDEN MESSAGE:*** 2 SP Cost, Your social action conveys a simple, secret message to one other person, which might be your target or a bystander. Others can detect this subterfuge with a Communication (Empathy) test with a TN equal to or greater than your successful roll.",
+    "***TAUNT:*** 2 SP Cost, You insult or distract one opponent of your choice within 10 yards of you. You must make an opposed test of your Communication (Deception) vs. the target's Willpower (Self-Discipline). If you win, the target suffers a -1 penalty to all opposed tests until the end of the current social encounter, or until they successfully taunt or undermine you. If used in combat, the target suffers a -1 penalty on attack rolls and casting rolls on their next turn.",
+    "***SPOT TELLS:*** 3 SP Cost, Your interaction gives you a sense of how your target might deceive you. The TN for their next test to lie or otherwise trick you is the standard TN or opposed roll, or the successful social roll, whichever is higher. This benefit lasts until the target fails in an attempt to lie or the encounter ends, whichever comes first.",
+    "***PAY ATTENTION:*** 3 SP Cost, Your interaction reveals information about your target beyond even what you might have been looking for. If you're pursuing an investigation, you gain an additional lead.",
+    "***SWAY:*** 4 SP Cost, Your social gesture is especially potent. You shift your target's Attitude an additional step in the direction of your choice.",
     "***INSPIRE:*** 4 SP Cost, Your behavior inspires allies who witness it. Each of them gets +1 to tests until your next turn.",
-    "***MANIPULATE:*** 5 SP Cost, Your outrageous or insidious manner prompts your target to take a rash action. They must use their next major
-    action (or a brief moment of narrative time) to attack, leave your presence, or do something else agreed upon by you and the
-    GM. This action cannot be blatantly suicidal or nonsensical—you can’t Manipulate someone into jumping off a cliff, for example.",
-    "***UNDERMINE:*** 5 SP Cost, Your social gesture gets under your target’s skin. They suffer a –2 penalty to all tests except attack rolls while in
-    your presence, for the remainder of the encounter or until the GM decides otherwise."
+    "***MANIPULATE:*** 5 SP Cost, Your outrageous or insidious manner prompts your target to take a rash action. They must use their next major action (or a brief moment of narrative time) to attack, leave your presence, or do something else agreed upon by you and the GM. This action cannot be blatantly suicidal or nonsensical—you can't Manipulate someone into jumping off a cliff, for example.",
+    "***UNDERMINE:*** 5 SP Cost, Your social gesture gets under your target's skin. They suffer a -2 penalty to all tests except attack rolls while in your presence, for the remainder of the encounter or until the GM decides otherwise."
 ];
 
 static BASIC_EXPLORATION_STUNTS: &[&str] = &[
     "***ASSIST:*** 1-3 SP Cost, Your action helps one of your allies. That ally gets +1 to their next test per SP spent.",
-    "***WARINESS:*** 1-3 SP Cost, You remain alert for the possible consequences of your action. You gain a +1 bonus per SP spent to the next test
-    to avoid any negative results from your actions. For example, if you used this stunt when breaking into a building, it would
-    apply to hiding from guards you may encounter.",
-    "***EFFICENCY:*** 2 SP Cost, Your action only takes half as much time or resources (choose one) as normal. In action time, you gain +2 to your
-    initiative rating for the rest of the encounter. You can't stack this bonus across multiple rounds.",
-    "***INSIGHT:*** 2 SP Cost, When performing an action that logically proceeds from this one (such as in an investigation) you gain a +1 bonus
-    to the test, and if specialized knowledge is required (including having a certain focus in order to attempt the next task at all),
-    you can muddle or bluff your way through, as long as it is not something extremely specific such as a password.",
-    "***COMPENSATE:*** 3 SP Cost, While performing the task you learn how to work with your surroundings. You ignore environmental penalties
-    to future tests in the same location for the remainder of the encounter, as long as they remain the same as when you performed
-    the action and events do not shift to action or combat.",
-    "***EXTRA INFORMATION:*** 3 SP Cost, You gain an additional piece of information related to your action. If you are examining a clue, you get
-    an additional lead from it.",
-    "***COVER YOUR TRACKS:*** 4 SP Cost, You leave no evidence you performed the action—or if possible, that the action was performed at all.
-    Your successful roll becomes the TN of tests to uncover what happened.",
-    "***READY FOR ACTION:*** 4 SP Cost, If combat or another action scene breaks out in the location where you acted, you gain an extra minor
-    action you can use before anyone else acts, regardless of your initiative. You can also take your usual actions when your turn
-    comes around.",
-    "***SWIFTNESS:*** 5 SP Cost, You act with supreme quickness—it's done in moments. In action time, you do not use up the action you would
-    have normally devoted to this task. In advanced or challenge tests, you do not use up a time increment and may roll again to
-    contribute toward the Success Threshold.",
-    "***SABOTAGE:*** 5 SP Cost, Anyone who tries to undo your action or follow in your footstep will regret it. Anyone trying to undo or duplicate
-    your action must make an appropriate test with a TN equal to your successful roll. If they fail, their actions are hindered in a
-    way determined by you and the GM working together. This can be anything from an embarrassing or inconvenient situation
-    up to the equivalent of a Moderate Hazard (2d6 damage). If you were attempting to set up a hazard or other hindrance in the
-    first place, its intensity is increased by one degree (Moderate to Major, for example) or adds an equivalent problem approved
-    by the GM."
+    "***WARINESS:*** 1-3 SP Cost, You remain alert for the possible consequences of your action. You gain a +1 bonus per SP spent to the next test to avoid any negative results from your actions. For example, if you used this stunt when breaking into a building, it would apply to hiding from guards you may encounter.",
+    "***EFFICENCY:*** 2 SP Cost, Your action only takes half as much time or resources (choose one) as normal. In action time, you gain +2 to your initiative rating for the rest of the encounter. You can't stack this bonus across multiple rounds.",
+    "***INSIGHT:*** 2 SP Cost, When performing an action that logically proceeds from this one (such as in an investigation) you gain a +1 bonus to the test, and if specialized knowledge is required (including having a certain focus in order to attempt the next task at all), you can muddle or bluff your way through, as long as it is not something extremely specific such as a password.",
+    "***COMPENSATE:*** 3 SP Cost, While performing the task you learn how to work with your surroundings. You ignore environmental penalties to future tests in the same location for the remainder of the encounter, as long as they remain the same as when you performed the action and events do not shift to action or combat.",
+    "***EXTRA INFORMATION:*** 3 SP Cost, You gain an additional piece of information related to your action. If you are examining a clue, you get an additional lead from it.",
+    "***COVER YOUR TRACKS:*** 4 SP Cost, You leave no evidence you performed the action—or if possible, that the action was performed at all. Your successful roll becomes the TN of tests to uncover what happened.",
+    "***READY FOR ACTION:*** 4 SP Cost, If combat or another action scene breaks out in the location where you acted, you gain an extra minor action you can use before anyone else acts, regardless of your initiative. You can also take your usual actions when your turn comes around.",
+    "***SWIFTNESS:*** 5 SP Cost, You act with supreme quickness—it's done in moments. In action time, you do not use up the action you would have normally devoted to this task. In advanced or challenge tests, you do not use up a time increment and may roll again to contribute toward the Success Threshold.",
+    "***SABOTAGE:*** 5 SP Cost, Anyone who tries to undo your action or follow in your footstep will regret it. Anyone trying to undo or duplicate your action must make an appropriate test with a TN equal to your successful roll. If they fail, their actions are hindered in a way determined by you and the GM working together. This can be anything from an embarrassing or inconvenient situation up to the equivalent of a Moderate Hazard (2d6 damage). If you were attempting to set up a hazard or other hindrance in the first place, its intensity is increased by one degree (Moderate to Major, for example) or adds an equivalent problem approved by the GM."
 ];
 
 static BASIC_SPELL_STUNTS: &[&str] = &[
     "***POWERFUL CASTING:*** 1-3 SP Cost, Increase the Spellpower of your spell by 1 per stunt point spent, to a maximum of 3.",
     "***SKILLFUL CASTING:*** 2 SP Cost, Reduce the magic point cost of the spell by 1. This can reduce the MP cost to 0.",
-    "***LASTING SPELL:*** 3 SP Cost, If the spell has a duration beyond instantaneous, it remains in effect twice as long with no additional MP cost.
-    Stone Cloak would last two hours instead of one, for example. Spells that last until the end of the encounter are extended by
-    1d6 minutes instead.",
-    "***MAGIC SHIELD:*** 3 SP Cost, You use the residual magic of the spell casting to set up a temporary protective shield. You gain a +2 bonus to
-    Defense until the beginning of your next turn.",
-    "***FAST CASTING:*** 4 SP Cost, After you resolve this spell, you can immediately cast another spell. The second spell must have a casting time
-    of a major action or a minor action. If you roll doubles on this casting roll you do not get any more stunt points.",
-    "***IMPOSING SPELL:*** 4 SP Cost, The effect of the spell is much more dramatic than usual. Until the beginning of your next turn, anyone
-    attempting to make a melee attack against you must make a successful Willpower (Courage) test. The target number (TN) is
-    10 + your Willpower ability. Those who fail must take a Move or Defend action instead.",
-    "***SPLIT SPELL:*** 4 SP Cost, If the spell affects only one target, you can have it affect two, so long as the second target is within the spell's range 
-    and no more than 6 yards from the original target. There is no additional MP cost. Targets test against the spell separately.",
-    "***DISRUPT MAGIC:*** 5 SP Cost, In addition to its normal effects, your spell is so powerful that it may disrupt another magical effect (such
-    as a spell) on the target. Make an Intelligence (Power Arcana) test vs. the Spellpower of any one effect on the target as a free
-    action. Success removes the effect.",
-    "***LETHAL SPELL:*** 5 SP Cost, If the spell does damage, one target of the spell takes an extra 2d6 damage. Alternately, all targets of the spell
-    take an additional 1d6 damage."
+    "***LASTING SPELL:*** 3 SP Cost, If the spell has a duration beyond instantaneous, it remains in effect twice as long with no additional MP cost. Stone Cloak would last two hours instead of one, for example. Spells that last until the end of the encounter are extended by 1d6 minutes instead.",
+    "***MAGIC SHIELD:*** 3 SP Cost, You use the residual magic of the spell casting to set up a temporary protective shield. You gain a +2 bonus to Defense until the beginning of your next turn.",
+    "***FAST CASTING:*** 4 SP Cost, After you resolve this spell, you can immediately cast another spell. The second spell must have a casting time of a major action or a minor action. If you roll doubles on this casting roll you do not get any more stunt points.",
+    "***IMPOSING SPELL:*** 4 SP Cost, The effect of the spell is much more dramatic than usual. Until the beginning of your next turn, anyone attempting to make a melee attack against you must make a successful Willpower (Courage) test. The target number (TN) is 10 + your Willpower ability. Those who fail must take a Move or Defend action instead.",
+    "***SPLIT SPELL:*** 4 SP Cost, If the spell affects only one target, you can have it affect two, so long as the second target is within the spell's range and no more than 6 yards from the original target. There is no additional MP cost. Targets test against the spell separately.",
+    "***DISRUPT MAGIC:*** 5 SP Cost, In addition to its normal effects, your spell is so powerful that it may disrupt another magical effect (such as a spell) on the target. Make an Intelligence (Power Arcana) test vs. the Spellpower of any one effect on the target as a free action. Success removes the effect.",
+    "***LETHAL SPELL:*** 5 SP Cost, If the spell does damage, one target of the spell takes an extra 2d6 damage. Alternately, all targets of the spell take an additional 1d6 damage."
 ];
 
 static ENVOY_SPECIFIC_STUNTS: &[&str] = &[
-    "***FAVOURED SOCIAL STUNT:*** You can use a basic social stunt for 1 SP less than usual. This applies to a single stunt normally worth 2 SP or more, whether it has a fixed or variable cost. You may select a new Favored 
-    Social Stunt multiple times, but you can't select the same stunt multiple times to reduce its cost by more than 1.",
+    "***FAVOURED SOCIAL STUNT:*** You can use a basic social stunt for 1 SP less than usual. This applies to a single stunt normally worth 2 SP or more, whether it has a fixed or variable cost. You may select a new Favored Social Stunt multiple times, but you can't select the same stunt multiple times to reduce its cost by more than 1.",
     "***EXAMINE (INVESTIGATE):*** 1-3 SP Cost, Your intuition and reason work together to guide your investigation. You gain a bonus equal to the SP spent on your next test to unlock a clue or discover related information.",
-    "***ENCOURAGE:*** Your presence spurs others to excellence. You can divide SP spent on this stunt among one or more allies, though no single ally can gain more than 3 SP. 
-    If these allies succeed at a basic test before your next turn, they can use these stunt points as if they had earned them, even if they don't roll doubles. SP gained by 
-    Inspire stack with SP from other sources, such as doubles.",
+    "***ENCOURAGE:*** Your presence spurs others to excellence. You can divide SP spent on this stunt among one or more allies, though no single ally can gain more than 3 SP. If these allies succeed at a basic test before your next turn, they can use these stunt points as if they had earned them, even if they don't roll doubles. SP gained by Inspire stack with SP from other sources, such as doubles.",
     "***RESURGENCE:*** 1-3 SP Cost, Select an ally within sight. That ally temporarily gains 3 bonus Health per SP spent. Any damage the ally suffers between now and the end of your next turn is removed from this bonus Health first. Any bonus Health remaining at the end of your next turn fades.",
     "***AND ANOTHER THING (EXPLORATION OF SOCIAL):*** 2 SP Cost Your insight and social acumen allow you to immediately make a second test related to your successful test. In action time, this occurs as a free action, but it cannot be an attack roll. In an advanced test, you may make the bonus test during the time increment in which you made the initial test.",
-    "***EXEMPLIFY:*** 2 SP Cost, You show your allies how it's done. Pick one ally who witnessed what you just did. When they perform the same general type of task as you just did, such as examining an area or attacking a foe, 
-    you may, with their permission, reroll their test for them, using your ability and focus ratings. This is a reaction that represents your counsel or inspiring presence. The results of the second roll 
-    are final, and don't generate SP. In action time, your ally must take the action to benefit from this stunt before your next turn.",
-    "***EMBOLDEN:*** 3 SP Cost, Your presence enhances a comrade's will to survive. One ally who you can communicate with gains 2 + your Communication temporary Health. This lasts until the end of the encounter. If 
-    the ally takes damage during this time, it reduces their temporary Health first. This stunt can only be used once per ally per encounter and can't be used on characters with 0 Health.",
-    "***THE GOOD WORD (SOCIAL):*** 3 SP Cost, You not only achieve your social aims, but make your compatriots appear more trustworthy, appealing—or if necessary, uncompromising, 
-    or even frightening. For the rest of the encounter, your allies gain +1 to all social tests, including opposed tests to resist others' attempts to influence or elicit information from them.",
-    "***DOMINATE FOE:*** 4 SP Cost, You compel an enemy to feel intense fear, confusion, or distraction. Select one target who can perceive you and has a Willpower no higher than your Communication. 
-    You impose one of the following conditions on them Confused, Defenseless, or Frightened. You choose which condition affects your target. It lasts until the end of your next turn.",
-    "***FOLLOW THE PATTERN (EXPLORATION OR SOCIAL): 4 SP Cost, You divine the common thread connecting your success to a series of tasks. You gain a +2 bonus to a number of subsequent 
-    exploration or social tests (but not those related to combat, chases, or other dynamic physical tasks in action time) equal to your Willpower. The disadvantage is all such tests become 
-    simple tests, incapable of generating or using SP themselves. You can choose to forego this benefit for the chance to gain SP, but it still counts as one of your uses of it.***",
+    "***EXEMPLIFY:*** 2 SP Cost, You show your allies how it's done. Pick one ally who witnessed what you just did. When they perform the same general type of task as you just did, such as examining an area or attacking a foe, you may, with their permission, reroll their test for them, using your ability and focus ratings. This is a reaction that represents your counsel or inspiring presence. The results of the second roll are final, and don't generate SP. In action time, your ally must take the action to benefit from this stunt before your next turn.",
+    "***EMBOLDEN:*** 3 SP Cost, Your presence enhances a comrade's will to survive. One ally who you can communicate with gains 2 + your Communication temporary Health. This lasts until the end of the encounter. If the ally takes damage during this time, it reduces their temporary Health first. This stunt can only be used once per ally per encounter and can't be used on characters with 0 Health.",
+    "***THE GOOD WORD (SOCIAL):*** 3 SP Cost, You not only achieve your social aims, but make your compatriots appear more trustworthy, appealing—or if necessary, uncompromising, or even frightening. For the rest of the encounter, your allies gain +1 to all social tests, including opposed tests to resist others' attempts to influence or elicit information from them.",
+    "***DOMINATE FOE:*** 4 SP Cost, You compel an enemy to feel intense fear, confusion, or distraction. Select one target who can perceive you and has a Willpower no higher than your Communication. You impose one of the following conditions on them Confused, Defenseless, or Frightened. You choose which condition affects your target. It lasts until the end of your next turn.",
+    "***FOLLOW THE PATTERN (EXPLORATION OR SOCIAL):*** 4 SP Cost, You divine the common thread connecting your success to a series of tasks. You gain a +2 bonus to a number of subsequent exploration or social tests (but not those related to combat, chases, or other dynamic physical tasks in action time) equal to your Willpower. The disadvantage is all such tests become simple tests, incapable of generating or using SP themselves. You can choose to forego this benefit for the chance to gain SP, but it still counts as one of your uses of it.",
     "***BOON COMPANION:*** 5 SP Cost, You focus your wise counsel and intuitive abilities on a single ally. They gain a +2 bonus to all tests for the remainder of the encounter.",
-    "***CREATE OPPERTUNITY:*** 5 SP Cost, Your attack opens up your enemy to an additional strike from an ally. Pick one ally. They gain a single attack against your target as 
-    a free action at a +2 bonus to the attack roll, but they must have a weapon immediately ready to use, and must be within range, since the opportunity is too sudden to allow them to move.",
-    "***ROUSE:*** 5 SP Cost, Your actions raise the spirits of a fallen ally. Select one ally at 0 Health who can perceive your words or actions. (This rules out characters with the Unconscious condition.) 
-    They gain Health equal to your Communication and lose their Defeat Condition. You may only Rouse an ally once per encounter."
+    "***CREATE OPPERTUNITY:*** 5 SP Cost, Your attack opens up your enemy to an additional strike from an ally. Pick one ally. They gain a single attack against your target as a free action at a +2 bonus to the attack roll, but they must have a weapon immediately ready to use, and must be within range, since the opportunity is too sudden to allow them to move.",
+    "***ROUSE:*** 5 SP Cost, Your actions raise the spirits of a fallen ally. Select one ally at 0 Health who can perceive your words or actions. (This rules out characters with the Unconscious condition.) They gain Health equal to your Communication and lose their Defeat Condition. You may only Rouse an ally once per encounter."
 ];
 
 static MAGE_SPECIFIC_STUNTS: &[&str] = &[
-    "***FAVOURED SPELL STUNT (SPELL):*** You can use a spell stunt for 1 SP less than usual. This applies to a single stunt normally worth 2 SP or more, whether it has a fixed or variable cost. You may select a new Favored 
-    Spell Stunt multiple times, but you can't select the same stunt multiple times to reduce its cost by more than 1.",
+    "***FAVOURED SPELL STUNT (SPELL):*** You can use a spell stunt for 1 SP less than usual. This applies to a single stunt normally worth 2 SP or more, whether it has a fixed or variable cost. You may select a new Favored Spell Stunt multiple times, but you can't select the same stunt multiple times to reduce its cost by more than 1.",
     "***ARCANE ADVANTAGE (SPELL OR ARCANE BLAST):*** 1-3 SP Cost, The target of your spell or Arcane Blast suffers a -1 penalty to rolls to resist your next spell per SP spent. In action time, this benefit expires at end of your next turn.",
-    "***SAGACITY:*** 1-3 SP Cost, Your actions reflect your mystic discipline and secret knowledge, granting you a +1 bonus per SP spent on your next Intelligence or Willpower-based roll, including spellcasting 
-    tests. In action time, you must use this advantage before the end of your next turn.",
+    "***SAGACITY:*** 1-3 SP Cost, Your actions reflect your mystic discipline and secret knowledge, granting you a +1 bonus per SP spent on your next Intelligence or Willpower-based roll, including spellcasting tests. In action time, you must use this advantage before the end of your next turn.",
     "***MYSTIC ARMOR:*** 2 SP Cost, You generate an aura of power around you that grants an Armor Rating equal to your Willpower ability, but it does not stack with armor you might be wearing. This lasts until your next turn.",
     "***BATTLE MAGIC (SPELL):*** 2 SP Cost, You may follow up your spell with an Arcane Blast as an immediate free action, though the blast becomes a simple test that can't generate or use SP.",
-    "***COMPLEX ARCANA (SPELL):*** 3 SP Cost, You use the ambient energy of your spell to craft another one. If the next spell you cast comes from the same arcana, deduct the base magic point cost of your last spell (before stunts or 
-    any extra expenditures to mitigate failed rolls, etc.) from your new spell. In action time, this benefit expires at end of your next turn.",
-    "***OMEN:*** 3 SP Cost, Visions or subtle signs provide a mystic insight relevant to your situation. The GM can provide a useful piece of information, unlocks the clue to a lead you're aware of, or provides 
-    a new lead. If the GM has no relevant information, your SP do not go to waste, though you must spend them on a different stunt.",
+    "***COMPLEX ARCANA (SPELL):*** 3 SP Cost, You use the ambient energy of your spell to craft another one. If the next spell you cast comes from the same arcana, deduct the base magic point cost of your last spell (before stunts or any extra expenditures to mitigate failed rolls, etc.) from your new spell. In action time, this benefit expires at end of your next turn.",
+    "***OMEN:*** 3 SP Cost, Visions or subtle signs provide a mystic insight relevant to your situation. The GM can provide a useful piece of information, unlocks the clue to a lead you're aware of, or provides a new lead. If the GM has no relevant information, your SP do not go to waste, though you must spend them on a different stunt.",
     "***HORRIFIC MAGIC (SPELL):*** 4 SP Cost, Your magic reveals terrifying visions and insights. Your spell is also Revelatory Horror (see Chapter 8) affecting your target, with a resistance TN equal to your Spellpower.",
     "***MAGE'S AWE:*** 4 SP Cost, Your glorious or ominous power marks you as not to be trifled with. You gain a +2 bonus to social tests for the remainder of the encounter, and when you roll doubles on them, you gain +1 SP.",
-    "***MYSTIC INSIGHT:*** 5 SP Cost, Your action triggers a moment of inspiration, allowing you to cast a spell you don't know. This can either be a Novice-de-gree spell from an arcana you're untrained in, or another spell 
-    up to one degree higher than the highest degree spell you know in an arcana you are trained in. You may cast this spell once during the encounter, after which the moment of inspi-ration passes. You may, however, now learn the spell without 
-    a teacher or other source of information. When casting the spell, you must make a spellcasting test and pay the cost in magic points as usual.",
+    "***MYSTIC INSIGHT:*** 5 SP Cost, Your action triggers a moment of inspiration, allowing you to cast a spell you don't know. This can either be a Novice-de-gree spell from an arcana you're untrained in, or another spell up to one degree higher than the highest degree spell you know in an arcana you are trained in. You may cast this spell once during the encounter, after which the moment of inspi-ration passes. You may, however, now learn the spell without a teacher or other source of information. When casting the spell, you must make a spellcasting test and pay the cost in magic points as usual.",
     "***PENETRATING MAGIC (DAMAGING SPELL OR ARCANE BLAST):*** 5 SP Cost, Your spell or Arcane Blast inflicts penetrating damage."
 ];
 
 static ROGUE_SPECIFIC_STUNTS: &[&str] = &[
     "***FAVOURED EXPLORATION STUNT:*** You can use a basic exploration stunt for 1 SP less than usual. This applies to a single stunt normally worth 2 SP or more, whether it has a fixed or variable cost. You may select a new Favored",
     "***FINESSE COMBAT STUNT:*** You can use a basic combat stunt for 1 SP less than usual. This applies to a single stunt normally worth 2 SP or more (whether it has a fixed or variable cost) from the following list Boost, Stay Aware, Disarm, Pierce Armor, Defensive Stance, Lightning Attack. You may select a new Finesse Combat Stunt multiple times, but you can't select the same stunt multiple times to reduce its cost by more than 1.",
-    "***MISDIRECTION (DEXTARITY-BASED TESTS):*** 1+ SP Cost, Using clever distractions and sleight of hand, you can disappear from plain sight or otherwise perform another immediate 
-    additional task that most people would consider impossible to do while under direct observation, such as freeing yourself from manacles without being noticed by the guard 
-    looking right at you or stealing the sword right out of their hand. Such direct witnesses get an opposed roll as if you were performing the act under the proper, unseen conditions. 
-    You can nullify the direct observation of one person per SP spent.",
-    "***SPRING:*** 1-3 SP Cost, You position yourself to react with agility. You gain a bonus equal to SP spent on any single Dexterity-based test, as long as it happens immediately after the act that triggered this 
-    stunt. In action time, this test must take place before the end of your next turn. In advanced and challenge tests, it must take place during the next time increment.",
-    "***IMPROVED DISARM:*** 2 SP Cost, Make opposed attack rolls with your enemy. If you win you disarm them, knocking their weapon 1d6 + Strength yards away in a direction you choose, and unlike the standard 
-    Disarm, if your roll to Disarm scores doubles, you gain SP as if it was a normal attack roll, which you can spend on additional effects, with the exception of Improved Disarm and any other rare stunt that might generate SP itself.",
-    "***SNATCH:*** 2 SP Cost, You come away from your action having lifted an object of your choice from a person or place within reach, without having used another action. This can be an object you've observed, or it can 
-    be “the first thing in the box,” or something similar. To snatch something being held by another person requires an opposed test; you and the object's holder choose whether to use Dexterity
-    (Legerdemain) or Strength (Might). The GM may allow you to conceal that you've taken something with a Dexterity (Legerdemain) test opposed by the Perception-based tests of relevant 
-    witnesses. If this is taking place in blatant plain sight, you may have to combine this stunt with Misdirect, above. You may also use this stunt to place an item, as well as take one.",
+    "***MISDIRECTION (DEXTARITY-BASED TESTS):*** 1+ SP Cost, Using clever distractions and sleight of hand, you can disappear from plain sight or otherwise perform another immediate additional task that most people would consider impossible to do while under direct observation, such as freeing yourself from manacles without being noticed by the guard looking right at you or stealing the sword right out of their hand. Such direct witnesses get an opposed roll as if you were performing the act under the proper, unseen conditions. You can nullify the direct observation of one person per SP spent.",
+    "***SPRING:*** 1-3 SP Cost, You position yourself to react with agility. You gain a bonus equal to SP spent on any single Dexterity-based test, as long as it happens immediately after the act that triggered this stunt. In action time, this test must take place before the end of your next turn. In advanced and challenge tests, it must take place during the next time increment.",
+    "***IMPROVED DISARM:*** 2 SP Cost, Make opposed attack rolls with your enemy. If you win you disarm them, knocking their weapon 1d6 + Strength yards away in a direction you choose, and unlike the standard Disarm, if your roll to Disarm scores doubles, you gain SP as if it was a normal attack roll, which you can spend on additional effects, with the exception of Improved Disarm and any other rare stunt that might generate SP itself.",
+    "***SNATCH:*** 2 SP Cost, You come away from your action having lifted an object of your choice from a person or place within reach, without having used another action. This can be an object you've observed, or it can be “the first thing in the box,” or something similar. To snatch something being held by another person requires an opposed test; you and the object's holder choose whether to use Dexterity (Legerdemain) or Strength (Might). The GM may allow you to conceal that you've taken something with a Dexterity (Legerdemain) test opposed by the Perception-based tests of relevant witnesses. If this is taking place in blatant plain sight, you may have to combine this stunt with Misdirect, above. You may also use this stunt to place an item, as well as take one.",
     "***EVADE:*** 2 SP Cost, You slip past your foes. Until your next turn, you gain +2 to Defense, and each time an attack misses you, you may move 4 yards without using an action.",
-    "***FLOURISH:*** 3 SP Cost, You impress others with your grace—or confuse them with your wily ways. You gain a +1 bonus to tests targeting anyone who saw what you just did. This benefit lasts until you are hit 
-    in combat, otherwise injured, take a condition, or fail a test, as these setbacks crack your impressive façade.",
+    "***FLOURISH:*** 3 SP Cost, You impress others with your grace—or confuse them with your wily ways. You gain a +1 bonus to tests targeting anyone who saw what you just did. This benefit lasts until you are hit in combat, otherwise injured, take a condition, or fail a test, as these setbacks crack your impressive façade.",
     "***REDIRECT BLOW (MELEE):*** 3 SP Cost, You guide your opponent off balance, making it hard for them to follow up. Make opposed attack rolls with your opponent. If you win, their next attack (during the next round ) against you automatically misses.",
     "***REED IN THE WIND:*** 3 SP Cost, You step lightly and are well prepared to deal with incoming danger. Add your Dexterity rating to your Armor Rating until your next turn. You cannot use this stunt if you are suffering an Armor Penalty.",
     "***ESCAPE:*** 4 SP Cost, They who live and run away...well, in any event, you may move half your Speed immediately, without using an action, and gain +2 to all Dexterity and Perception-based tests, and all chase tests, until the end of your next turn.",
     "***PERFORATE:*** 4 SP Cost, Make an additional attack as a free action. If this attack hits, and your Dexterity is greater than your opponent's, you inflict an additional 1d6 damage on top of the attack's usual damage. This stunt can be used on top of the Pinpoint Attack ability.",
-    "***CRUEL STRIKE:*** 5 SP Cost, Your blow inflicts an awful, demoralizing injury. You leave a visually prominent wound on the target. Your opponent must succeed at a Willpower (Morale) test opposed by your 
-    successful attack roll or gain one of the following conditions, chosen by the GM: Confused, Frightened, or Defenseless. That condition remains for the rest of the encounter or until they regain Health, whichever comes first.",
+    "***CRUEL STRIKE:*** 5 SP Cost, Your blow inflicts an awful, demoralizing injury. You leave a visually prominent wound on the target. Your opponent must succeed at a Willpower (Morale) test opposed by your successful attack roll or gain one of the following conditions, chosen by the GM: Confused, Frightened, or Defenseless. That condition remains for the rest of the encounter or until they regain Health, whichever comes first.",
     "***GET AWAY:*** 5 SP cost, You set yourself up to exercise the better part of valor. You can immediately move your Speed without using an action.",
-    "***STEADY HAND:*** 5 SP Cost, Your triumph is just the beginning of a cycle of calm, graceful action. You gain a +3 bonus to a number of subsequent Dexterity or Accuracy-based tests equal to your Willpower, 
-    or until you fail one of them. The disadvantage is all such tests become simple tests, incapable of generating or using SP themselves. You can choose to forego this benefit for the chance to gain SP, but it still counts as one of your uses of it."
+    "***STEADY HAND:*** 5 SP Cost, Your triumph is just the beginning of a cycle of calm, graceful action. You gain a +3 bonus to a number of subsequent Dexterity or Accuracy-based tests equal to your Willpower, or until you fail one of them. The disadvantage is all such tests become simple tests, incapable of generating or using SP themselves. You can choose to forego this benefit for the chance to gain SP, but it still counts as one of your uses of it."
 ];
 
 static WARRIOR_SPECIFIC_STUNTS: &[&str] = &[
-    "***FAVOURED COMBAT STUNT:*** You can use a basic combat stunt for 1 SP less than usual. This applies to a single stunt normally worth 2 SP or more, whether it has a fixed or variable cost. You may select a new Favored 
-    Combat Stunt multiple times, but you can't select the same stunt multiple times to reduce its cost by more than 1.",
+    "***FAVOURED COMBAT STUNT:*** You can use a basic combat stunt for 1 SP less than usual. This applies to a single stunt normally worth 2 SP or more, whether it has a fixed or variable cost. You may select a new Favored Combat Stunt multiple times, but you can't select the same stunt multiple times to reduce its cost by more than 1.",
     "***BLOCK:*** 1-3 SP Cost, You intercept oncoming attacks with your shield, weapon, or the thickest piece of your armor. You gain a bonus to your AR qual to SP spent + 1 until your next turn.",
     "***COUNTER:*** 1 SP Cost, You're ready to counter your enemy's tricks. Until your next turn, any foe using a basic combat stunt or Warrior stunt against you must pay 1 SP to affect you before spending other SP on those stunts.",
-    "***PROTECT:*** 2 SP Cost, You position yourself to intercept attacks targeting your allies (an arrow wings you before impacting your ally, you grab at a sword blade to prevent it from striking firmly...). If an attack hits an 
-    ally within 4 yards before your next turn, you can choose to take the damage instead, but you get only half your AR against it.",
-    "***THREATEN:*** 2 SP Cost, Choose an enemy who can see or hear you. Make an opposed Strength (Intimidation) test versus their Willpower (Morale). If you win, the enemy cannot use their next major action to 
-    attack or otherwise try to harm anyone except you (though they can choose not to attack anyone).",
-    "***LIMB STRIKE:*** 3 SP Cost, Your blow injures one of your foe's appendages, and they take a -3 penalty to tests that use it until your next turn. Further more, 
-    a blow to a humanoid leg or equivalent levies a -5 penalty to Speed, while one inflicted on a shield arm deprives your opponent of its Defense bonus.",
+    "***PROTECT:*** 2 SP Cost, You position yourself to intercept attacks targeting your allies (an arrow wings you before impacting your ally, you grab at a sword blade to prevent it from striking firmly...). If an attack hits an ally within 4 yards before your next turn, you can choose to take the damage instead, but you get only half your AR against it.",
+    "***THREATEN:*** 2 SP Cost, Choose an enemy who can see or hear you. Make an opposed Strength (Intimidation) test versus their Willpower (Morale). If you win, the enemy cannot use their next major action to attack or otherwise try to harm anyone except you (though they can choose not to attack anyone).",
+    "***LIMB STRIKE:*** 3 SP Cost, Your blow injures one of your foe's appendages, and they take a -3 penalty to tests that use it until your next turn. Further more, a blow to a humanoid leg or equivalent levies a -5 penalty to Speed, while one inflicted on a shield arm deprives your opponent of its Defense bonus.",
     "***UNBALANCE:*** 3 SP Cost, Your attack disrupts your opponent's balance and momentum. Choose whether they suffer the Defenseless or Stunned condition; they keep the condition until your next turn.",
     "***FAVOURED FOE:*** 4 SP Cost, You've learned something of the enemy's tactics. You gain a +2 bonus to attack and damage rolls targeting that foe (and all foes with identical game statistics) for the rest of the encounter. You only gain the benefits of this stunt once per enemy.",
-    "***DUAL STRIKE:*** 4 SP Cost, Your attack's momentum carries through to strike another foe—or perhaps it's powerful enough to skewer or slam two at once. Choose another enemy within 6 yards of your initial 
-    attack. Apply the same weapon and attack roll of the original attack to the new target, rolling for damage if you hit. Furthermore, if you have other SP to spend you can use them on both the original and new target.",
-    "***STORM OF STRIKES:*** 5 SP Cost, You unleash swift blows in every direction where a foe can be found. Apply your attack roll to a number of additional targets equal to your Dexterity. If you are using a missile weapon, 
-    you must have sufficient ammunition to attack all targets, but reloading is part of this stunt and doesn't use up actions as usual, unless reloading your weapon requires a major action or multiple
-    minor actions per reload, in which case you can't use this stunt.",
-    "***WOUNDING BLOW:*** 5 SP Cost, Your precise yet devastating blow inflicts the Blinded, Deafened, or Scarred condition (with the specifics for the last arranged with the GM) on your target, lasting until they recover at least half their 
-    maximum Health or heal any damage, whichever comes last."
+    "***DUAL STRIKE:*** 4 SP Cost, Your attack's momentum carries through to strike another foe—or perhaps it's powerful enough to skewer or slam two at once. Choose another enemy within 6 yards of your initial attack. Apply the same weapon and attack roll of the original attack to the new target, rolling for damage if you hit. Furthermore, if you have other SP to spend you can use them on both the original and new target.",
+    "***STORM OF STRIKES:*** 5 SP Cost, You unleash swift blows in every direction where a foe can be found. Apply your attack roll to a number of additional targets equal to your Dexterity. If you are using a missile weapon, you must have sufficient ammunition to attack all targets, but reloading is part of this stunt and doesn't use up actions as usual, unless reloading your weapon requires a major action or multiple minor actions per reload, in which case you can't use this stunt.",
+    "***WOUNDING BLOW:*** 5 SP Cost, Your precise yet devastating blow inflicts the Blinded, Deafened, or Scarred condition (with the specifics for the last arranged with the GM) on your target, lasting until they recover at least half their maximum Health or heal any damage, whichever comes last."
 ];
