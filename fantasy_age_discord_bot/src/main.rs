@@ -1,7 +1,6 @@
 mod http_health;
 mod dice_rolls;
 mod fantasy_age_stunts;
-mod message_helper;
 use serenity::{
     all::{CreateInteractionResponseMessage, Interaction},
     async_trait,
@@ -54,11 +53,7 @@ impl EventHandler for Handler {
                 _ => "Unknown command.".to_string(),
             };
 
-            message_helper::send_long_response(&ctx, &command, &response).await.unwrap_or_else(|why| {
-                tracing::error!("Error sending long response: {:?}", why);
-            });
-    
-            /*if let Err(why) = command
+            if let Err(why) = command
                 .create_response(
                     &ctx.http,
                     CreateInteractionResponse::Message(
@@ -68,7 +63,7 @@ impl EventHandler for Handler {
                 .await
             {
                 tracing::error!("Error sending slash command response: {:?}", why);
-            } */
+            }
         }
     }
 
