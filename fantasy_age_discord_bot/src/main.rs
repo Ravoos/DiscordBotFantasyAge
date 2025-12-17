@@ -21,7 +21,7 @@ struct Handler;
 #[async_trait]
 impl EventHandler for Handler {
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
-        if let Interaction::MessageComponent(component) = &interaction {
+        if let Interaction::Component(component) = &interaction {
             let cutsomes = component.data.custom_id.clone();
             let parts: Vec<&str> = cutsomes.split(':').collect();
 
