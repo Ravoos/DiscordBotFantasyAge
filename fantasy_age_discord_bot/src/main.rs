@@ -1,6 +1,7 @@
 mod http_health;
 mod dice_rolls;
 mod fantasy_age_stunts;
+mod pagnation;
 use serenity::{
     all::{CreateInteractionResponseMessage, Interaction},
     async_trait,
@@ -20,8 +21,46 @@ struct Handler;
 #[async_trait]
 impl EventHandler for Handler {
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
+        if let Interaction::Component(component) = &interaction {
+            let cutsomes = component.data.custom_id.clone();
+            let parts: Vec<&str> = cutsomes.split(':').collect();
+
+            if parts.len() < 2 {
+                return;
+            }
+
+            let title = parts[0];
+            let page = parts[1].parse::<usize>().unwrap_or(0);
+
+            let stunts: Vec<String> = if title.starts_with("Basic stunts") {
+                let kind = title.split(':').last().unwrap().trim();
+                fantasy_age_stunts::get_basic_stunts(kind)
+            }
+            else if title.starts_with("Class stunts") {
+                let class_name = title.split(':').last().unwrap().trim();
+                fantasy_age_stunts::get_stunts_for_class(class_name)
+            } else {
+                vec!["Unknown pagination source".into()]
+            };
+
+            let (embed, components) = pagnation::build_stunt_page(title, &stunts, page);
+
+            let _ = component
+                .create_response(
+                    &ctx.http,
+                    CreateInteractionResponse::Message(
+                        CreateInteractionResponseMessage::new()
+                            .add_embed(embed)
+                            .components(components),
+                    ),
+                ).await;
+
+            return;
+        }
+
         if let Interaction::Command(command) = interaction {
             let response = match command.data.name.as_str() {
+
                 "mainroll" => {
                     let modifier: i32 = match command.data.options.get(0).map(|opt| &opt.value) {
                         Some(CommandDataOptionValue::Integer(i)) => *i as i32,
@@ -29,6 +68,7 @@ impl EventHandler for Handler {
                     };
                     dice_rolls::main_dice_roller(modifier)
                 }
+
                 "damageroll" => {
                     let expr: String = match command.data.options.get(0).map(|opt| &opt.value) {
                         Some(CommandDataOptionValue::String(s)) => s.clone(),
@@ -36,19 +76,58 @@ impl EventHandler for Handler {
                     };
                     dice_rolls::damage_dice_roller(&expr)
                 }
+
                 "basicstunts" => {
                     let basic_stunt_name: String = match command.data.options.get(0).map(|opt| &opt.value) {
                         Some(CommandDataOptionValue::String(s)) => s.clone(),
                         _ => "".to_string(),
                     };
-                    fantasy_age_stunts::get_basic_stunts(&basic_stunt_name)
+
+                    let output_stunts = fantasy_age_stunts::get_basic_stunts(&basic_stunt_name);
+
+                    let (embed, components) = pagnation::build_stunt_page(
+                        &format!("Basic stunts: {}", basic_stunt_name), 
+                        &output_stunts, 
+                        0);
+
+                    if let Err(why) = command.create_response(
+                        &ctx.http,
+                        CreateInteractionResponse::Message(
+                            CreateInteractionResponseMessage::new()
+                                .add_embed(embed)
+                                .components(components)
+                                .ephemeral(true),
+                        ),
+                    ).await {
+                        tracing::error!("Error sending basic stunts response: {:?}", why);
+                    }
+                    return;
                 }
+
                 "classstunts" => {
                     let class_name: String = match command.data.options.get(0).map(|opt| &opt.value) {
                         Some(CommandDataOptionValue::String(s)) => s.clone(),
                         _ => "".to_string(),
                     };
-                    fantasy_age_stunts::get_stunts_for_class(&class_name)
+                    let output_stunts = fantasy_age_stunts::get_stunts_for_class(&class_name);
+
+                    let (embed, components) = pagnation::build_stunt_page(
+                        &format!("Class stunts: {}", class_name), 
+                        &output_stunts, 
+                        0);
+
+                    if let Err(why) = command.create_response(
+                        &ctx.http,
+                        CreateInteractionResponse::Message(
+                            CreateInteractionResponseMessage::new()
+                                .add_embed(embed)
+                                .components(components)
+                                .ephemeral(true),
+                        ),
+                    ).await {
+                        tracing::error!("Error sending basic stunts response: {:?}", why);
+                    }
+                    return;
                 }
                 _ => "Unknown command.".to_string(),
             };

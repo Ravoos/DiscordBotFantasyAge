@@ -1,0 +1,48 @@
+use serenity::all::*;
+use std::cmp;
+
+pub fn paginate_vec(
+    items: &[String],
+    page: usize,
+    per_page: usize,
+) -> (Vec<String>, usize) {
+    let total_pages = (items.len() + per_page - 1) / per_page;
+    let clamped_page = cmp::min(page, total_pages.saturating_sub(1));
+
+    let start = clamped_page * per_page;
+    let end = cmp::min(start + per_page, items.len());
+
+    (items[start..end].to_vec(), total_pages)
+}
+
+pub fn build_stunt_page(
+    title: &str,
+    stunts: &[String],
+    page: usize,
+) -> (CreateEmbed, Vec<CreateActionRow>) {
+    let per_page = 5;
+    let total_pages = (stunts.len() + per_page - 1) / per_page;
+    let (items, page) = paginate_vec(stunts, page, per_page);
+
+    let embed = CreateEmbed::new()
+        .title(format!("{} (Page {}/{})", title, page + 1, total_pages))
+        .description(items.join("\n"))
+        .color(0x00AAFF);
+
+    let mut action_rows = Vec::new();
+
+    if total_pages > 1 {
+        action_rows.push(
+            CreateActionRow::Buttons(vec![
+                CreateButton::new(format!("{}:{}", title, page.saturating_sub(1)))
+                    .label("Prev")
+                    .style(ButtonStyle::Secondary),
+                CreateButton::new(format!("{}:{}", title, page + 1))
+                    .label("Next")
+                    .style(ButtonStyle::Secondary),
+            ])
+        );
+    }
+
+    (embed, action_rows)
+}

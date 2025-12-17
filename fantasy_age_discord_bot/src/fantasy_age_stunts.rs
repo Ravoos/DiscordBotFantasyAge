@@ -1,33 +1,25 @@
-pub fn get_stunts_for_class(class_name: &str) -> String {
+pub fn get_stunts_for_class(class_name: &str) -> Vec<String> {
     let stunts = match class_name.to_lowercase().as_str() {
         "warrior" => WARRIOR_SPECIFIC_STUNTS,
         "rogue" => ROGUE_SPECIFIC_STUNTS,
         "mage" => MAGE_SPECIFIC_STUNTS,
         "envoy" => ENVOY_SPECIFIC_STUNTS,
-        _ => return format!("Unknown class: {}. Available classes are 'warrior', 'rogue', 'mage' and 'envoy'.", class_name),
+        _ => return vec![format!("Unknown class: {}. Available classes are 'warrior', 'rogue', 'mage' and 'envoy'.", class_name)],
     };
 
-    let mut output = format!("Stunts for {}:\n", class_name);
-    for stunt in stunts {
-        output.push_str(&format!("- {}\n", stunt));
-    }
-    output
+    stunts.iter().map(|s| s.to_string()).collect()
 }
 
-pub fn get_basic_stunts(basic_stunt_type: &str) -> String {
+pub fn get_basic_stunts(basic_stunt_type: &str) -> Vec<String> {
     let stunts = match basic_stunt_type.to_lowercase().as_str() {
         "combat" => BASIC_COMBAT_STUNTS,
         "social" => BASIC_SOCIAL_STUNTS,
         "exploration" => BASIC_EXPLORATION_STUNTS,
         "spell" => BASIC_SPELL_STUNTS,
-        _ => return format!("Unknown stunt type: {}. Available types are 'combat', 'social', 'exploration' and 'spell'.", basic_stunt_type),
+        _ => return vec![format!("Unknown stunt type: {}. Available types are 'combat', 'social', 'exploration' and 'spell'.", basic_stunt_type)],
     };
 
-    let mut output = format!("Stunts for {}:\n", basic_stunt_type);
-    for stunt in stunts {
-        output.push_str(&format!("- {}\n", stunt));
-    }
-    output
+    stunts.iter().map(|s| s.to_string()).collect()
 }
 
 static BASIC_COMBAT_STUNTS: &[&str] = &[
