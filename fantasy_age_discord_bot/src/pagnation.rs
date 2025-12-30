@@ -15,16 +15,32 @@ fn paginate_vec(
     (items[start..end].to_vec(), total_pages, clamped_page)
 }
 
+fn split_stunt(stunt: &str) -> (&str, &str) {
+    if let Some((name, rest)) = stunt.split_once(":*** ") {
+        (name.trim_matches('*'), rest)
+    } else {
+        ("Stunt", stunt)
+    }
+}
+
 pub fn build_stunt_page(
     title: &str,
     stunts: &[String],
     page: usize,
 ) -> (CreateEmbed, Vec<CreateActionRow>) {
     let per_page = 5;
-    let (_items, total_pages, _clamped_page) = paginate_vec(stunts, page, per_page);
+    let (items, total_pages, _clamped_page) = paginate_vec(stunts, page, per_page);
 
-    let embed = CreateEmbed::new()
+    let mut embed = CreateEmbed::new()
         .title(format!("{} (Page {}/{})", title, page + 1, total_pages));
+
+    for stunt in items {
+        let (name, description) = split_stunt(&stunt);
+        embed = embed.field(
+            format!("***{name}***"),
+            description,
+            false);
+    }
 
     let mut buttons = Vec::new();
 
