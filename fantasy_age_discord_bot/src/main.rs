@@ -2,12 +2,13 @@ mod http_health;
 mod dice_rolls;
 mod fantasy_age_stunts;
 mod pagnation;
+mod register_commands;
 use serenity::{
     all::{CreateInteractionResponseMessage, Interaction},
     async_trait,
-    builder::{CreateCommand, CreateCommandOption, CreateInteractionResponse},
+    builder::CreateInteractionResponse,
     model::{
-        application::{CommandDataOptionValue, CommandOptionType},
+        application::CommandDataOptionValue,
         gateway::Ready,
     },
     prelude::*,
@@ -88,11 +89,25 @@ impl EventHandler for Handler {
                 }
 
                 "damageroll" => {
-                    let expr: String = match command.data.options.get(0).map(|opt| &opt.value) {
-                        Some(CommandDataOptionValue::String(s)) => s.clone(),
-                        _ => "1d6".to_string(),
-                    };
-                    let response = dice_rolls::damage_dice_roller(&expr);
+                    let dice : i32 = command.data.options.iter().find_map(|opt| {
+                        if opt.name == "dice" {
+                            if let CommandDataOptionValue::Integer(i) = &opt.value {
+                                return Some(*i as i32);
+                            }
+                        }
+                        None
+                    }).unwrap_or(1);
+
+                    let damage_modifier : i32 = command.data.options.iter().find_map(|opt| {
+                        if opt.name == "damage_modifier" {
+                            if let CommandDataOptionValue::Integer(i) = &opt.value {
+                                return Some(*i as i32);
+                            }
+                        }
+                        None
+                    }).unwrap_or(0);
+
+                    let response = dice_rolls::damage_dice_roller(dice as u32, damage_modifier);
 
                     if let Err(why) = command
                         .create_response(
@@ -180,19 +195,6 @@ impl EventHandler for Handler {
     }
 }
 
-fn register_main_roll_command() -> CreateCommand {
-    CreateCommand::new("mainroll")
-        .description("Roll 3d6 and add a modifier")
-        .add_option(
-            CreateCommandOption::new(
-                CommandOptionType::Integer,
-                "modifier",
-                "Modifier to add to the roll",
-            )
-            .required(false),
-        )
-}
-
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv::dotenv().ok();
@@ -269,37 +271,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             match serenity::model::application::Command::set_global_commands(
                 &client.http,
                 vec![
-                    register_main_roll_command(),
-                    CreateCommand::new("damageroll")
-                        .description("Roll Xd6 + Y damage")
-                        .add_option(
-                            CreateCommandOption::new(
-                                CommandOptionType::String,
-                                "roll",
-                                "Dice roll, e.g., 2d6+3",
-                            )
-                            .required(true),
-                        ),
-                    CreateCommand::new("basicstunts")
-                        .description("Get a list of the basic stunts available in Fantasy AGE")
-                        .add_option(
-                            CreateCommandOption::new(
-                                CommandOptionType::String,
-                                "type",
-                                "Type of basic stunts: combat, social, exploration, spell",
-                            )
-                        .required(true),
-                        ),
-                    CreateCommand::new("classstunts")
-                        .description("Get a list of stunts for a specific Fantasy AGE class")
-                        .add_option(
-                            CreateCommandOption::new(
-                                CommandOptionType::String,
-                                "class",
-                                "Class name: warrior, rogue, mage, envoy",
-                            )
-                        .required(true),
-                        )
+                register_commands::register_main_roll_command(),
+                register_commands::register_damage_roll_command(),
+                register_commands::register_basic_stunts_command(),
+                register_commands::register_class_stunts_command(),
                 ],
             )
             .await

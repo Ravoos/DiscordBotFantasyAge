@@ -1,5 +1,4 @@
 use rand::Rng;
-use regex::Regex;
 use std::collections::HashMap;
 
 pub fn main_dice_roller(modifier: i32) -> String {
@@ -32,37 +31,23 @@ pub fn main_dice_roller(modifier: i32) -> String {
     output
 }
 
-pub fn damage_dice_roller(input: &str) -> String {
-    let pattern = Regex::new(r"(?i)^(\d+)d6\s*([+-]\s*\d+)?$").unwrap();
+pub fn damage_dice_roller(dice: u32, damage_modifier: i32) -> String {
+    let num_dice = dice.min(100);
 
-    if let Some(caps) = pattern.captures(input) {
-        let num_dice: u32 = caps.get(1).and_then(|m| m.as_str().parse().ok()).unwrap_or(1);
-        let num_dice = num_dice.min(100);
+    let rolls = roll_d6(num_dice);
+    let base_total: i32 = rolls.iter().map(|&x| x as i32).sum();
+    let final_amount = base_total + damage_modifier;
 
-        let modifier: i32 = caps
-            .get(2)
-            .and_then(|m| m.as_str().replace(' ', "").parse().ok())
-            .unwrap_or(0);
+    let modifier_str = match damage_modifier {
+        0 => String::new(),
+        m if m > 0 => format!(" + {}", m),
+        m => m.to_string(),
+    };
 
-        let rolls = roll_d6(num_dice);
-        let base_total: i32 = rolls.iter().map(|&x| x as i32).sum();
-        let total = base_total + modifier;
-
-        let modifier_str = if modifier == 0 {
-            String::new()
-        } else if modifier > 0 {
-            format!("+{}", modifier)
-        } else {
-            format!("{}", modifier)
-        };
-
-        format!(
-            "You rolled {}d6{} {:?} = **{}**",
-            num_dice, modifier_str, rolls, total
-        )
-    } else {
-        "Invalid format. Please use Xd6+Y or Xd6-Y, e.g., 2d6+3".to_string()
-    }
+    format!(
+        "You rolled {}d6{} {:?} = **{}**",
+        num_dice, modifier_str, rolls, final_amount
+    )
 }
 
 fn roll_d6(num: u32) -> Vec<u32> {
