@@ -21,52 +21,66 @@ struct Handler;
 #[async_trait]
 impl EventHandler for Handler {
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
-        if let Interaction::Component(component) = &interaction {
-            let cutsomes = component.data.custom_id.clone();
-            let parts: Vec<&str> = cutsomes.split(':').collect();
+        if let Some(component) = interaction.clone().message_component() {
+        let custom_id = component.data.custom_id.clone();
 
-            if parts.len() < 2 {
-                return;
+        let (title, page): (String, usize) = match custom_id.rsplit_once(':') {
+            Some((t, p)) => {
+                let page_num = p.parse::<usize>().unwrap_or(0);
+                (t.to_string(), page_num)
             }
+            None => (custom_id, 0),
+        };
 
-            let title = parts[0];
-            let page = parts[1].parse::<usize>().unwrap_or(0);
+        let stunts: Vec<String> = if title.starts_with("Basic stunts") {
+            let kind = title.split(':').last().unwrap().trim();
+            fantasy_age_stunts::get_basic_stunts(kind)
+        } else if title.starts_with("Class stunts") {
+            let class_name = title.split(':').last().unwrap().trim();
+            fantasy_age_stunts::get_stunts_for_class(class_name)
+        } else {
+            vec!["Unknown pagination source".to_string()]
+        };
 
-            let stunts: Vec<String> = if title.starts_with("Basic stunts") {
-                let kind = title.split(':').last().unwrap().trim();
-                fantasy_age_stunts::get_basic_stunts(kind)
-            }
-            else if title.starts_with("Class stunts") {
-                let class_name = title.split(':').last().unwrap().trim();
-                fantasy_age_stunts::get_stunts_for_class(class_name)
-            } else {
-                vec!["Unknown pagination source".into()]
-            };
+        let (embed, components) =
+            pagnation::build_stunt_page(&title, &stunts, page);
 
-            let (embed, components) = pagnation::build_stunt_page(title, &stunts, page);
-
-            let _ = component
-                .create_response(
-                    &ctx.http,
-                    CreateInteractionResponse::Message(
+        let _ = component
+            .create_response(
+            &ctx.http,
+            CreateInteractionResponse::UpdateMessage(
                         CreateInteractionResponseMessage::new()
-                            .add_embed(embed)
-                            .components(components),
+                        .add_embed(embed)
+                        .components(components),
                     ),
-                ).await;
+            )
+            .await;
 
-            return;
+        return;
         }
 
+
         if let Interaction::Command(command) = interaction {
-            let response = match command.data.name.as_str() {
+            match command.data.name.as_str() {
 
                 "mainroll" => {
                     let modifier: i32 = match command.data.options.get(0).map(|opt| &opt.value) {
                         Some(CommandDataOptionValue::Integer(i)) => *i as i32,
                         _ => 0,
                     };
-                    dice_rolls::main_dice_roller(modifier)
+                    let response = dice_rolls::main_dice_roller(modifier);
+
+                    if let Err(why) = command
+                        .create_response(
+                            &ctx.http,
+                            CreateInteractionResponse::Message(
+                                CreateInteractionResponseMessage::new().content(&response),
+                            ),
+                        )
+                        .await
+                    {
+                        tracing::error!("Error sending slash command response: {:?}", why);
+                    }
                 }
 
                 "damageroll" => {
@@ -74,7 +88,19 @@ impl EventHandler for Handler {
                         Some(CommandDataOptionValue::String(s)) => s.clone(),
                         _ => "1d6".to_string(),
                     };
-                    dice_rolls::damage_dice_roller(&expr)
+                    let response = dice_rolls::damage_dice_roller(&expr);
+
+                    if let Err(why) = command
+                        .create_response(
+                            &ctx.http,
+                            CreateInteractionResponse::Message(
+                                CreateInteractionResponseMessage::new().content(&response),
+                            ),
+                        )
+                        .await
+                    {
+                        tracing::error!("Error sending slash command response: {:?}", why);
+                    }
                 }
 
                 "basicstunts" => {
@@ -101,7 +127,6 @@ impl EventHandler for Handler {
                     ).await {
                         tracing::error!("Error sending basic stunts response: {:?}", why);
                     }
-                    return;
                 }
 
                 "classstunts" => {
@@ -127,22 +152,22 @@ impl EventHandler for Handler {
                     ).await {
                         tracing::error!("Error sending basic stunts response: {:?}", why);
                     }
-                    return;
                 }
-                _ => "Unknown command.".to_string(),
+                _ => {
+                    if let Err(why) = command
+                        .create_response(
+                            &ctx.http,
+                            CreateInteractionResponse::Message(
+                                CreateInteractionResponseMessage::new()
+                                    .content("Unknown command"),
+                            ),
+                        )
+                        .await
+                    {
+                        tracing::error!("Error sending slash command response: {:?}", why);
+                    }
+                }
             };
-
-            if let Err(why) = command
-                .create_response(
-                    &ctx.http,
-                    CreateInteractionResponse::Message(
-                        CreateInteractionResponseMessage::new().content(&response),
-                    ),
-                )
-                .await
-            {
-                tracing::error!("Error sending slash command response: {:?}", why);
-            }
         }
     }
 
