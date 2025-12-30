@@ -22,7 +22,7 @@ pub fn main_dice_roller(modifier: i32) -> String {
         format!(" - {}", modifier.abs())
     };
 
-    let mut output = format!("Result: {:?}{} = {}", rolls, modifier_str, final_amount);
+    let mut output = format!("Result: {:?}{} = **{}**", rolls, modifier_str, final_amount);
 
     if has_duplicates {
         output.push_str(&format!("\n**DOUBLES!** You gain {} stunt points!", last_roll));
@@ -44,10 +44,7 @@ pub fn damage_dice_roller(dice: u32, damage_modifier: i32) -> String {
         m => m.to_string(),
     };
 
-    format!(
-        "You rolled {}d6{} {:?} = **{}**",
-        num_dice, modifier_str, rolls, final_amount
-    )
+    format!("RESULT: {}d6{} {:?} = **{}**", num_dice, modifier_str, rolls, final_amount)
 }
 
 fn roll_d6(num: u32) -> Vec<u32> {
