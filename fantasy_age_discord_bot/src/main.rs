@@ -16,6 +16,8 @@ use anyhow::Result;
 use std::env;
 use tokio::time::{sleep, Duration};
 
+const STUNTS_PER_PAGE: usize = 5;
+
 struct Handler;
 
 #[async_trait]
@@ -41,6 +43,8 @@ impl EventHandler for Handler {
         } else {
             vec!["Unknown pagination source".to_string()]
         };
+
+        let page = page.min(stunts.len().saturating_sub(1) / STUNTS_PER_PAGE);
 
         let (embed, components) =
             pagnation::build_stunt_page(&title, &stunts, page);
