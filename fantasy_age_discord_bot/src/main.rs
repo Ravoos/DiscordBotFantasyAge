@@ -89,10 +89,10 @@ impl EventHandler for Handler {
                 }
 
                 "damageroll" => {
-                    let dice : i32 = command.data.options.iter().find_map(|opt| {
+                    let dice : u32 = command.data.options.iter().find_map(|opt| {
                         if opt.name == "dice" {
                             if let CommandDataOptionValue::Integer(i) = &opt.value {
-                                return Some(*i as i32);
+                                return Some(*i as u32);
                             }
                         }
                         None
@@ -107,7 +107,7 @@ impl EventHandler for Handler {
                         None
                     }).unwrap_or(0);
 
-                    let response = dice_rolls::damage_dice_roller(dice as u32, damage_modifier);
+                    let response = dice_rolls::damage_dice_roller(dice, damage_modifier);
 
                     if let Err(why) = command
                         .create_response(
