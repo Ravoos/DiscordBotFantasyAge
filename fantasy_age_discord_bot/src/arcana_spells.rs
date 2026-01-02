@@ -305,5 +305,32 @@ static DIVINATION_ARCANA_SPELLS: &[&str] = &[
     events elsewhere. You can maintain a number of active sentinel spells at any one time equal to your Willpower, although you can only perceive through one of them at a time. 
     At Expert degree, you can spend an additional 2 MP to allow your sentinel to deliver a short message (just a sentence or two) in the voice of your choosing when it is activated. 
     At Master degree, you can cast a single spell you know while perceiving through your sentinel as if you were present at that point, but doing so ends the sentinel spell.",
+    "***ILL OMENS, ATTACK***
+    - **Requirements:** Divination Arcana (Expert) - **MP Cost:** 8
+    - **Casting Time:** One Minute - **Target Number:** 14
+    - **Test:** Willpower (Faith) vs. Spellpower
+    Your knowledge of the future makes one target vulnerable. When you meet the target in any type of encounter during the 24 hours after you cast ill omens, you can activate its effects 
+    as a free action. For the remainder of the encounter, the target suffers a -2 penalty on ability tests based on one ability of your choice (Communication, Dexterity, etc.). 
+    Stunts based on that ability also generate -2 stunt points. If the target makes a successful Willpower (Faith) test vs. your Spellpower, the ability test and stunt point penalties are only -1. 
+    Ill omens is only effective for a single encounter, and it cannot be cast on the same target more than once every 24 hours, though you may cast it again to affect a different target without this restriction. 
+    Each target requires a separate ill omens casting.",
+    "***SCRYING, UTILITY***
+    - **Requirements:** Divination Arcana (Expert) - **MP Cost:** 18
+    - **Casting Time:** Major Action - **Target Number:** 13+
+    - **Test:** Perception (Empathy) vs. Spellpower
+    You can perceive distant events as if you were physically present using a medium such as a crystal, flame, mirror, cloud of smoke, or liquid surface. 
+    You can use scrying to sense a particular place, creature, or thing known to you using the TN from the Scrying table. If the casting roll is successful, you can observe the subject as if you 
+    were present. The vision lasts for as long as you concentrate, taking a minor action each round to do so, but your ordinary senses are overridden so you are unaware of what is happening 
+    near you while you are observing events elsewhere. Scrying creates an arcane disturbance, which creatures with Intelligence 1 or greater can sense. Any such creature under 
+    observation can make a Perception (Empathy) test against your Spellpower to recognize they are being mystically observed. Creatures with no arcane abilities get the intense 
+    feeling of being watched. Those with spell talents see a glowing or shadowy image of you observing them. At Master degree, you can deliberately allow this image to appear to 
+    others, if you wish, and speak to them through it as if you were present.",
+    "***GOOD OMENS, DEFENSE***
+    - **Requirements:** Divination Arcana (Master) - **MP Cost:** 10
+    - **Casting Time:** One Minute - **Target Number:** 15
+    Your knowledge of the future provides good fortune to your party. In the next combat encounter, you and your allies gain two benefits. 
+    First, each of you can reroll your Initiative tests and take the better result. Second, you and up to ten of your allies gain a +1 to your Defense for the whole encounter. 
+    In addition, once per round, without using another action, you can give yourself or any one ally a free Prepare action (see p. 49), allowing 
+    the recipient to delay their action and interrupt another participant's action on the fly, as luck provides ideal timing.",
     
 ];
