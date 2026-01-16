@@ -332,5 +332,14 @@ static DIVINATION_ARCANA_SPELLS: &[&str] = &[
     First, each of you can reroll your Initiative tests and take the better result. Second, you and up to ten of your allies gain a +1 to your Defense for the whole encounter. 
     In addition, once per round, without using another action, you can give yourself or any one ally a free Prepare action (see p. 49), allowing 
     the recipient to delay their action and interrupt another participant's action on the fly, as luck provides ideal timing.",
-    
+    "***UNVEIL, UTILITY***
+    - **Requirements:** Divination Arcana (Master) - **MP Cost:** 10
+    - **Casting Time:** Major Action - **Target Number:** 15
+    Your sorcery reveals all, casting aside magic that would shroud the truth from your senses.
+    Upon casting this powerful divination and for the rest of the encounter, you can perceive through all forms of magical deception or illusion. 
+    Invisible things are visible to you, illusions revealed as unreal, and even magically created darkness or mist cannot hamper your sight. 
+    You remain aware of the presence of such things, but they have no effect on you and you can see them for what they really are. 
+    Magically transformed or shape-shifted beings show a ghostly overlay of their true form or appearance."
 ];
+
+
