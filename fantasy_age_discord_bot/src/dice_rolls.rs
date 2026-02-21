@@ -22,7 +22,7 @@ pub fn main_dice_roller(modifier: i32) -> String {
         format!(" - {}", modifier.abs())
     };
 
-    let mut output = format!("Result: {:?}{} = **{}**", rolls, modifier_str, final_amount);
+    let mut output = format!("RESULT: 3d6{} {:?}{} = **{}**", modifier_str, rolls, modifier_str, final_amount);
 
     if has_duplicates {
         output.push_str(&format!("\n**DOUBLES!** You gain {} stunt points!", last_roll));
